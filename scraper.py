@@ -18,7 +18,8 @@ def extract_next_links(url, resp):
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
 
     if resp.status != 200:
-            error = resp.error
+            #error = resp.error
+            return list()       # skips current page if error occurs
             # do something with the type of error
 
     # add simhash to check similarity
