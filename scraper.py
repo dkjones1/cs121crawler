@@ -38,7 +38,7 @@ def is_valid(url):
         if not website:
             return False
 
-        return re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*')
+        return re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', parsed.path.lower())
 
     except TypeError:
         print ("TypeError for ", parsed)
