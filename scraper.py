@@ -37,7 +37,7 @@ def extract_next_links(url, resp):
     # needs data structure to hold the hash values
 
         soup = BeautifulSoup(resp.raw_response.content, "html.parser")
-        output.write(soup)
+        output.write(soup.text)
         tags = soup.find_all('a')
         links = [link for link in tags['href']]
         output.write(links)
