@@ -19,7 +19,7 @@ def extract_next_links(url, resp):
 
     # write status and contents to output file so I can see what exactly the resp does and error codes
     # error codes split into pieces so I can read it easily
-    with open('output.txt', 'w') as output:
+    with open('output.txt', 'a+') as output:
 
         if (resp.status >= 200 and resp.status < 400):
             output.write(str(resp.status) + "\n")
@@ -29,6 +29,7 @@ def extract_next_links(url, resp):
 
         elif (resp.status >= 600 and resp.status <= 606):
             output.write(str(resp.status) + "\n")
+            return list()
 
         # just in case if instructions did not mention another code that could occur
         else:
