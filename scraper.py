@@ -20,8 +20,7 @@ def extract_next_links(url, resp):
     # write status and contents to output file so I can see what exactly the resp does and error codes
     # error codes split into pieces so I can read it easily
     with open('output.txt', 'w') as output:
-        output.write(url)
-        
+
         if (resp.status >= 200 and resp.status < 400):
             output.write(str(resp.status) + "\n")
 
@@ -57,8 +56,11 @@ def is_valid(url):
     # There are already some conditions that return False.
     try:
         parsed = urlparse(url)
+        print('if http(s)')
         if parsed.scheme not in set(["http", "https"]):
             return False
+
+        print('regex type of website')
         website = re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -72,6 +74,7 @@ def is_valid(url):
         if website:
             return False
 
+        print('regex uci domain')
         #possible regex
         return re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', parsed.path.lower())
 
