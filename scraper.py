@@ -42,7 +42,9 @@ def extract_next_links(url, resp):
         for link in tags:
             if link.has_attr('href'):
                 links.append(link['href'])
-        output.write(links)
+
+        for link in links:
+            output.write(link + '\n')
 
     return links
 
