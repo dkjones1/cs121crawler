@@ -39,7 +39,10 @@ def extract_next_links(url, resp):
         soup = BeautifulSoup(resp.raw_response.content, "html.parser")
         output.write(soup.text)
         tags = soup.find_all('a')
-        links = [link for link in tags['href']]
+        links = []
+        for link in tags:
+            if link.has_attr('href'):
+                links.append(link['href'])
         output.write(links)
 
     return links
