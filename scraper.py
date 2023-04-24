@@ -21,17 +21,17 @@ def extract_next_links(url, resp):
     # error codes split into pieces so I can read it easily
     with open('output.txt', 'w') as output:
         if (resp.status >= 200 and resp.status < 400):
-            output.write(str(resp.status) + "\n" + resp.raw_response.text)
+            output.write(str(resp.status) + "\n")
 
         elif (resp.status >= 400 and resp.status <= 599):
-            output.write(str(resp.status) + "\n" + resp.raw_response.text)
+            output.write(str(resp.status) + "\n")
 
         elif (resp.status >= 600 and resp.status <= 606):
-            output.write(str(resp.status) + "\n" + resp.raw_response.text)
+            output.write(str(resp.status) + "\n")
 
         # just in case if instructions did not mention another code that could occur
         else:
-            output.write(str(resp.status) + "\n" + resp.raw_response.text)
+            output.write(str(resp.status) + "\n")
 
     # add simhash to check similarity
     # needs data structure to hold the hash values
@@ -66,7 +66,7 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
 
-        if not website:
+        if website:
             return False
 
         #possible regex
