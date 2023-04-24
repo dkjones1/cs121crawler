@@ -29,8 +29,8 @@ def extract_next_links(url, resp):
         elif (resp.status >= 400 and resp.status <= 599):
             output.write(str(resp.status) + "\n")
 
-        # if error occures between 600 and 606, skip the current website
-        elif (resp.status >= 600 and resp.status <= 606):
+        # if error occures between 600 and 606 (got error for 607), skip the current website
+        elif resp.status >= 600:
             output.write(str(resp.status) + "\n")
             return list()
 
