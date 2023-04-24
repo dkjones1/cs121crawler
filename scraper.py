@@ -58,7 +58,7 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
-
+        print(parsed.path.lower())
         website = re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -73,7 +73,6 @@ def is_valid(url):
             return False
 
         reg = re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', parsed.path.lower())
-        print(reg)
         return reg
 
     except TypeError:
