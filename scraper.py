@@ -17,6 +17,8 @@ def extract_next_links(url, resp):
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
 
+    # had error while running: couldnt decode character so it was replaced with replacement character
+
     # write status and contents to output file so I can see what exactly the resp does and error codes
     # error codes split into pieces so I can read it easily
     with open('output.txt', 'a+') as output:
@@ -27,6 +29,7 @@ def extract_next_links(url, resp):
         elif (resp.status >= 400 and resp.status <= 599):
             output.write(str(resp.status) + "\n")
 
+        # if error occures between 600 and 606, skip the current website
         elif (resp.status >= 600 and resp.status <= 606):
             output.write(str(resp.status) + "\n")
             return list()
@@ -73,6 +76,7 @@ def is_valid(url):
         if website:
             return False
 
+        # regex to check if the url is within the ics/cs/inf/stats domains
         return re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
 
     except TypeError:
