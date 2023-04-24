@@ -45,6 +45,7 @@ def extract_next_links(url, resp):
 
         for link in links:
             output.write(link + '\n')
+        output.write('-------------------------------------------------------------------\n')
 
     return links
 
