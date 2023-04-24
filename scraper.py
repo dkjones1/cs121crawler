@@ -17,17 +17,30 @@ def extract_next_links(url, resp):
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
 
-    if resp.status != 200:
-            #error = resp.error
-            return list()       # skips current page if error occurs
-            # do something with the type of error
+    # write status and contents to output file so I can see what exactly the resp does and error codes
+    # error codes split into pieces so I can read it easily
+    with open('output.txt', 'w') as output:
+        if (resp.status >= 200 and resp.status < 400):
+            output.write(resp.status + "\n" + resp.raw_response.content)
+
+        elif (resp.status >= 400 and resp.status <= 599):
+            output.write(resp.status + "\n" + resp.raw_response.content)
+
+        elif (resp.status >= 600 and resp.status <= 606):
+            output.write(resp.status + "\n" + resp.raw_response.content)
+
+        # just in case if instructions did not mention another code that could occur
+        else:
+            output.write(resp.status + "\n" + resp.raw_response.content)
 
     # add simhash to check similarity
     # needs data structure to hold the hash values
 
-    soup = BeautifulSoup(resp.raw_response.content, "html.parser")
-    tags = soup.find_all('a')
-    links = [link for link in tags['href']]
+        soup = BeautifulSoup(resp.raw_response.content, "html.parser")
+        output.write(soup)
+        tags = soup.find_all('a')
+        links = [link for link in tags['href']]
+        output.write(links)
 
     return links
 
