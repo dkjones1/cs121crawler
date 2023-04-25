@@ -24,19 +24,19 @@ def extract_next_links(url, resp):
     with open('output.txt', 'a+') as output:
 
         if (resp.status >= 200 and resp.status < 400):
-            output.write(str(resp.status) + "\n")
+            output.write(str(resp.status) + "\n" + url + "\n")
 
         elif (resp.status >= 400 and resp.status <= 599):
-            output.write(str(resp.status) + "\n")
+            output.write(str(resp.status) + "\n" + url + "\n")
 
         # if error occures between 600 and 606 (got error for 607), skip the current website
         elif resp.status >= 600:
-            output.write(str(resp.status) + "\n")
+            output.write(str(resp.status) + "\n" + url + "\n")
             return list()
 
         # just in case if instructions did not mention another code that could occur
         else:
-            output.write(str(resp.status) + "\n")
+            output.write(str(resp.status) + "\n" + url + "\n")
 
     # add simhash to check similarity
     # needs data structure to hold the hash values
