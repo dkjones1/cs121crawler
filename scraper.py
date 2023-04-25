@@ -46,7 +46,10 @@ def extract_next_links(url, resp):
         links = []
         for link in tags:
             if link.has_attr('href'):
-                links.append(link['href'])
+                absPath = link['href']
+                if 'https://www.' not in absPath:
+                    absPath = urlparse.urljoin(url, absPath)
+            links.append(absPath)
 
         for link in links:
             output.write(link + '\n')
