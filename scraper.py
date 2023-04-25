@@ -38,10 +38,9 @@ def extract_next_links(url, resp):
         else:
             output.write(str(resp.status) + "\n" + url + "\n")
 
-    # add simhash to check similarity
-    # needs data structure to hold the hash values
-    links = []
-    """
+        # add simhash to check similarity
+        # needs data structure to hold the hash values
+
         soup = BeautifulSoup(resp.raw_response.content, "html.parser")
         tags = soup.find_all('a')
         links = []
@@ -58,7 +57,7 @@ def extract_next_links(url, resp):
         for link in links:
             output.write(link + '\n')
         output.write('-------------------------------------------------------------------\n')
-    """
+
 
     return links
 
