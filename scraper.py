@@ -49,7 +49,7 @@ def extract_next_links(url, resp):
                 absPath = link['href']
                 if 'https://' not in absPath:
                     domain = re.findall(r'(https:\/\/.+\/|https:\/\/.+\.edu).*', url)
-                    if not domain.endswith('/'):
+                    if not domain[0].endswith('/'):
                         domain += '/'
                     absPath = domain[0] + absPath
             links.append(absPath)
