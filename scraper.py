@@ -1,5 +1,5 @@
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 
 def scraper(url, resp):
@@ -48,7 +48,7 @@ def extract_next_links(url, resp):
             if link.has_attr('href'):
                 absPath = link['href']
                 if 'https://www.' not in absPath:
-                    absPath = urlparse.urljoin(url, absPath)
+                    absPath = urljoin(url, absPath)
             links.append(absPath)
 
         for link in links:
