@@ -23,7 +23,7 @@ def extract_next_links(url, resp):
     # error codes split into pieces so I can read it easily
     with open('output.txt', 'a+') as output:
         
-        
+        '''
         if (resp.status >= 200 and resp.status < 400):
             output.write(str(resp.status) + "\n" + url + "\n")
 
@@ -43,9 +43,13 @@ def extract_next_links(url, resp):
         else:
             output.write(str(resp.status) + "\n" + url + "\n")
         '''
-        if resp.status != 200:
+        if resp.status >= 600:
             output.write(str(resp.status) + "\n" + url + "\n")
-        '''
+            return list()
+
+        elif resp.status != 200:
+            output.write(str(resp.status) + "\n" + url + "\n")
+        
 
         # add simhash to check similarity
         # needs data structure to hold the hash values
