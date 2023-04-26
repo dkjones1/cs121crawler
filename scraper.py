@@ -61,9 +61,9 @@ def extract_next_links(url, resp):
 
                     else:
                         if not absPath.startswith('/'):
-                            absPath = parsed.scheme + '://' + parsed.netloc + '/' + absPath
+                            absPath = url + absPath
                         else:
-                            absPath = parsed.scheme + '://' + parsed.netloc + absPath
+                            absPath = url + '/' + absPath
                             
                 links.append(absPath)
 
