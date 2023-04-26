@@ -49,25 +49,25 @@ def extract_next_links(url, resp):
         # add simhash to check similarity
         # needs data structure to hold the hash values
 
-            soup = BeautifulSoup(resp.raw_response.content, "html.parser")
-            tags = soup.find_all('a')
-            links = []
-            for link in tags:
-                if link.has_attr('href'):
-                    absPath = link['href']
-                    if not absPath.startswith('http'):
-                        parsed = urlparse(url)
+        soup = BeautifulSoup(resp.raw_response.content, "html.parser")
+        tags = soup.find_all('a')
+        links = []
+        for link in tags:
+            if link.has_attr('href'):
+                absPath = link['href']
+                if not absPath.startswith('http'):
+                    parsed = urlparse(url)
 
-                        if absPath.startswith('www.'):
-                            absPath = parsed.scheme + '://' + absPath
+                    if absPath.startswith('www.'):
+                        absPath = parsed.scheme + '://' + absPath
 
-                        elif absPath.startswith('/www.'):
-                            absPath = parsed.scheme + ':/' + absPath
+                    elif absPath.startswith('/www.'):
+                        absPath = parsed.scheme + ':/' + absPath
 
-                        elif absPath.startswith('//www.'):
+                    elif absPath.startswith('//www.'):
                             absPath = parsed.scheme + absPath
 
-                        else:
+                    else:
                             absPath = url + absPath
                     if not url in absPath:
                         links.append(absPath)
