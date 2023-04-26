@@ -57,9 +57,10 @@ def extract_next_links(url, resp):
                         domain = url.split('/')
                         links.append(absPath)
                         break
-                    domain = re.findall(r'(https:\/\/.+\/|https:\/\/.+\.edu).*', url)
-                    if not absPath.startswith('/') and not domain[0].endswith('/'):
-                        domain[0] += '/'
+                    else:
+                        domain = re.findall(r'(http.*:\/\/.+\/|http.*:\/\/.+\.edu).*', url)
+                        if not absPath.startswith('/') and not domain[0].endswith('/'):
+                            domain[0] += '/'
                     absPath = domain[0] + absPath
             links.append(absPath)
 
