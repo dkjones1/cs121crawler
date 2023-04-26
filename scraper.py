@@ -22,7 +22,8 @@ def extract_next_links(url, resp):
     # write status and contents to output file so I can see what exactly the resp does and error codes
     # error codes split into pieces so I can read it easily
     with open('output.txt', 'a+') as output:
-
+        
+        '''
         if (resp.status >= 200 and resp.status < 400):
             output.write(str(resp.status) + "\n" + url + "\n")
 
@@ -41,36 +42,39 @@ def extract_next_links(url, resp):
         # just in case if instructions did not mention another code that could occur
         else:
             output.write(str(resp.status) + "\n" + url + "\n")
+        '''
+        if resp.status != 200:
+            output.write(str(resp.status) + "\n" + url + "\n")
 
         # add simhash to check similarity
         # needs data structure to hold the hash values
 
-        soup = BeautifulSoup(resp.raw_response.content, "html.parser")
-        tags = soup.find_all('a')
-        links = []
-        for link in tags:
-            if link.has_attr('href'):
-                absPath = link['href']
-                if not absPath.startswith('http'):
-                    parsed = urlparse(url)
+            soup = BeautifulSoup(resp.raw_response.content, "html.parser")
+            tags = soup.find_all('a')
+            links = []
+            for link in tags:
+                if link.has_attr('href'):
+                    absPath = link['href']
+                    if not absPath.startswith('http'):
+                        parsed = urlparse(url)
 
-                    if absPath.startswith('www.'):
-                        absPath = parsed.scheme + '://' + absPath
+                        if absPath.startswith('www.'):
+                            absPath = parsed.scheme + '://' + absPath
 
-                    elif absPath.startswith('/www.'):
-                        absPath = parsed.scheme + ':/' + absPath
+                        elif absPath.startswith('/www.'):
+                            absPath = parsed.scheme + ':/' + absPath
 
-                    elif absPath.startswith('//www.'):
-                        absPath = parsed.scheme + absPath
+                        elif absPath.startswith('//www.'):
+                            absPath = parsed.scheme + absPath
 
-                    else:
-                        absPath = url + absPath
-                if not url in absPath:
-                    links.append(absPath)
+                        else:
+                            absPath = url + absPath
+                    if not url in absPath:
+                        links.append(absPath)
 
-        for link in links:
-            output.write(link + '\n')
-        output.write('-------------------------------------------------------------------\n')
+            for link in links:
+                output.write(link + '\n')
+            output.write('-------------------------------------------------------------------\n')
 
 
     return links
