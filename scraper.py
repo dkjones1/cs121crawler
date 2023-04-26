@@ -34,7 +34,7 @@ def extract_next_links(url, resp):
         elif (resp.status >= 400 and resp.status <= 599):
             output.write(str(resp.status) + "\n" + url + "\n")
 
-        # if error occures between 600 and 606 (got error for 607), skip the current website
+        # if error occurs between 600 and 606 (got error for 607), skip the current website
         elif resp.status >= 600:
             output.write(str(resp.status) + "\n" + url + "\n")
             return list()
@@ -43,12 +43,16 @@ def extract_next_links(url, resp):
         else:
             output.write(str(resp.status) + "\n" + url + "\n")
         '''
+
+        if resp.status != 200:
+            output.write(str(resp.status) + "\n" + url + "\n")
+
         if resp.status >= 600:
             output.write(str(resp.status) + "\n" + url + "\n")
             return list()
 
-        elif resp.status != 200:
-            output.write(str(resp.status) + "\n" + url + "\n")
+        elif resp.status == 404:
+            return list()
         
 
         # add simhash to check similarity
@@ -74,6 +78,7 @@ def extract_next_links(url, resp):
 
                     else:
                             absPath = url + absPath
+
                 if not url in absPath:
                     links.append(absPath)
 
