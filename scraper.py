@@ -51,18 +51,16 @@ def extract_next_links(url, resp):
                     if absPath.startswith('/www.'):
                         domain = url.split('/')
                         absPath = domain[0] + '/' + absPath
-                        links.append(absPath)
-                        break
+
                     elif absPath.startswith('//www.'):
                         domain = url.split('/')
-                        links.append(absPath)
-                        break
+                        absPath = domain[0] + absPath
+
                     else:
-                        domain = re.findall(r'(http.*:\/\/.+\/|http.*:\/\/.+\.edu).*', url)
+                        domain = re.findall(r'(http.*:\/\/.+\/|http.*:\/\/.+\.edu\/).*', url)
                         if not absPath.startswith('/') and not domain[0].endswith('/'):
-                            domain[0] += '/'
-                    absPath = domain[0] + absPath
-            links.append(absPath)
+                            absPath = domain[0] + absPath
+                links.append(absPath)
 
         for link in links:
             output.write(link + '\n')
@@ -99,3 +97,63 @@ def is_valid(url):
     except TypeError:
         print ("TypeError for ", parsed)
         raise
+
+# tokenizer method from Assignment 1
+def tokenize(website):
+    
+    try:
+        # tokens is the list that will hold all the tokens from the file
+        tokens = []
+        
+        # lastWord saves the last token in the list of tokens just in case
+        # that the buffer splits a word into two parts
+        lastToken = ''
+        with open(filePath[1], 'rb') as file:
+            while True:
+                # reads in 1024 bytes of data from the file and makes sure the 
+                # file is in utf-8 encoding and ignores any errors that can
+                # cause the program to crash if it cannot be encoded
+                bytesBuffer = file.read(1024).decode('utf-8', 'ignore').lower()
+                # if file is read then break
+                if not bytesBuffer:
+                    break
+                
+                # saves last character in case it is invalid to add onto lastToken
+                lastChar = bytesBuffer[-1]
+                
+                # appends the new slice of text to the last word saved from the
+                # previous iteration to make sure that if a word was split, then
+                # it will reconnect it
+                entireStr = lastToken + bytesBuffer
+                
+                # sets the string to all lowercase and gets a list of tokens
+                # that are alphanumeric
+                parsedBytes = re.findall(r'[a-z0-9]+', entireStr)
+                
+                # gets the last token just in case the last token was split
+                lastToken = parsedBytes.pop()
+                if not ('0' <= lastChar <= '9') and not ('a' <= lastChar <= 'z'):
+                    lastToken += lastChar
+                
+                # appends the tokens to the list
+                for word in parsedBytes:
+                    tokens.append(word)
+                    
+            # appends the final word of the file to the list
+            tokens.append(lastToken)
+            return tokens
+            
+    # handles FileNotFoundError exception if the file does not exist
+    except FileNotFoundError:
+        print("File not found")
+        exit(0)
+
+# frequency method from Assignment 1
+def computeTokenFrequencies(tokenList):
+    freq = {}
+    for token in tokenList:
+        if token in freq.keys():
+            freq[token] += 1
+        else:
+            freq[token] = 1
+    return freq
