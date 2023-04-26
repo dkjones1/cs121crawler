@@ -26,6 +26,10 @@ def extract_next_links(url, resp):
         if (resp.status >= 200 and resp.status < 400):
             output.write(str(resp.status) + "\n" + url + "\n")
 
+        # probably doesnt work
+        elif resp.status == 404:
+            return list()
+
         elif (resp.status >= 400 and resp.status <= 599):
             output.write(str(resp.status) + "\n" + url + "\n")
 
@@ -61,8 +65,8 @@ def extract_next_links(url, resp):
 
                     else:
                         absPath = url + absPath
-                            
-                links.append(absPath)
+                if not url in absPath:
+                    links.append(absPath)
 
         for link in links:
             output.write(link + '\n')
@@ -84,13 +88,18 @@ def is_valid(url):
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
-            + r"|ps|eps|tex|ppt|pptx|ppsx|doc|docx|xls|xlsx|names|mailto"
+            + r"|ps|eps|tex|ppt|pptx|ppsx|doc|docx|xls|xlsx|names"
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
 
         if website:
+            return False
+
+        mail = re.match(r'.*(mailto).*', url)
+
+        if mail:
             return False
 
         # regex to check if the url is within the ics/cs/inf/stats domains
