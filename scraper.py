@@ -72,9 +72,9 @@ def extract_next_links(url, resp):
                     if not url in absPath:
                         links.append(absPath)
 
-            for link in links:
-                output.write(link + '\n')
-            output.write('-------------------------------------------------------------------\n')
+        for link in links:
+            output.write(link + '\n')
+        output.write('-------------------------------------------------------------------\n')
 
 
     return links
