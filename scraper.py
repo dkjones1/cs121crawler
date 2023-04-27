@@ -152,7 +152,7 @@ def computeTokenFrequencies(tokenList):
 
 def getTokenHash(inputStr):
     hash = hashlib.sha256(inputStr.encode('utf-8')).digest() #hashes
-    binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(256) #converts into binary
+    binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(17) #converts into binary
     return binaryHash[:16] #returns the first 16 bits
 
 
