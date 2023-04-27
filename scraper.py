@@ -1,6 +1,7 @@
 import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
+import hashlib
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -47,13 +48,8 @@ def extract_next_links(url, resp):
         if resp.status != 200:
             output.write(str(resp.status) + "\n" + url + "\n")
 
-        if resp.status >= 600:
-            output.write(str(resp.status) + "\n" + url + "\n")
+        if resp.status == 400:
             return list()
-
-        elif resp.status == 404:
-            return list()
-        
 
         # add simhash to check similarity
         # needs data structure to hold the hash values
@@ -85,7 +81,6 @@ def extract_next_links(url, resp):
         for link in links:
             output.write(link + '\n')
         output.write('-------------------------------------------------------------------\n')
-
 
     return links
 
@@ -124,61 +119,67 @@ def is_valid(url):
         raise
 
 # tokenizer method from Assignment 1
-def tokenize(website):
-    
-    try:
-        # tokens is the list that will hold all the tokens from the file
-        tokens = []
-        
-        # lastWord saves the last token in the list of tokens just in case
-        # that the buffer splits a word into two parts
-        lastToken = ''
-        with open(filePath[1], 'rb') as file:
-            while True:
-                # reads in 1024 bytes of data from the file and makes sure the 
-                # file is in utf-8 encoding and ignores any errors that can
-                # cause the program to crash if it cannot be encoded
-                bytesBuffer = file.read(1024).decode('utf-8', 'ignore').lower()
-                # if file is read then break
-                if not bytesBuffer:
-                    break
-                
-                # saves last character in case it is invalid to add onto lastToken
-                lastChar = bytesBuffer[-1]
-                
-                # appends the new slice of text to the last word saved from the
-                # previous iteration to make sure that if a word was split, then
-                # it will reconnect it
-                entireStr = lastToken + bytesBuffer
-                
-                # sets the string to all lowercase and gets a list of tokens
-                # that are alphanumeric
-                parsedBytes = re.findall(r'[a-z0-9]+', entireStr)
-                
-                # gets the last token just in case the last token was split
-                lastToken = parsedBytes.pop()
-                if not ('0' <= lastChar <= '9') and not ('a' <= lastChar <= 'z'):
-                    lastToken += lastChar
-                
-                # appends the tokens to the list
-                for word in parsedBytes:
-                    tokens.append(word)
-                    
-            # appends the final word of the file to the list
-            tokens.append(lastToken)
-            return tokens
-            
-    # handles FileNotFoundError exception if the file does not exist
-    except FileNotFoundError:
-        print("File not found")
-        exit(0)
+def tokenize(contents):
+
+    words = re.findall(r'[a-z0-9]+', contents)
+    return words
 
 # frequency method from Assignment 1
 def computeTokenFrequencies(tokenList):
     freq = {}
+    stopWords = ['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'aren\'t',
+                 'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',
+                 'can\'t', 'cannot', 'could', 'couldn\'t', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t',
+                 'down', 'during', 'each', 'few', 'for', 'from', 'further', 'had', 'hadn\'t', 'has', 'hasn\'t', 'have',
+                 'haven\'t', 'having', 'he', 'he\'d', 'he\'ll', 'he\'s', 'her', 'here', 'here\'s', 'hers', 'herself',
+                 'him', 'himself', 'his', 'how', 'how\'s', 'i', 'i\'d', 'i\'ll', 'i\'m', 'i\'ve', 'if', 'in', 'into',
+                 'is', 'isn\'t', 'it', 'it\'s', 'its', 'itself', 'let\'s', 'me', 'more', 'most', 'mustn\'t', 'my',
+                 'myself', 'no', 'nor', 'not', 'of', 'off', 'on', 'once', 'only', 'or', 'other', 'ought', 'our', 'ours',
+                 'ourselves', 'out', 'over', 'own', 'same', 'shan\'t', 'she', 'she\'d', 'she\'ll', 'she\'s', 'should',
+                 'shouldn\'t', 'so', 'some', 'such', 'than', 'that', 'that\'s', 'the', 'their', 'theirs', 'them',
+                 'themselves', 'then', 'there', 'there\'s', 'these', 'they', 'they\'d', 'they\'ll', 'they\'re', 'they\'ve',
+                 'this', 'those', 'through', 'to', 'too', 'under', 'until', 'up', 'very', 'was', 'wasn\'t', 'we', 'we\'d',
+                 'we\'ll', 'we\'re', 'we\'ve', 'were', 'weren\'t', 'what', 'what\'s', 'when', 'when\'s', 'where', 'where\'s',
+                 'which', 'while', 'who', 'who\'s', 'whom', 'why', 'why\'s', 'with', 'won\'t', 'would', 'wouldn\'t', 'you',
+                 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves']
     for token in tokenList:
-        if token in freq.keys():
-            freq[token] += 1
-        else:
-            freq[token] = 1
+        if token not in stopWords:
+            if token in freq.keys():
+                freq[token] += 1
+            else:
+                freq[token] = 1
     return freq
+
+def getTokenHash(inputStr):
+    hash = hashlib.sha256(inputStr.encode('utf-8')).digest()  # hash the string using SHA256 algorithm
+    # convert hash value to binary representation with leading zeros
+    binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(256)
+    return binaryHash[:16]  # take the first 16 bits of the binary representation
+
+
+def simHash(tokenList):
+    vectorOutput = [0] * 16  # initialize output vector
+    for token in tokenList:
+        hashedToken = getTokenHash(token)  # hash every token
+        for i in range(16):  # 16 is the number of bits that are returned from the hash
+            if (hashedToken[i] == '0'):
+                vectorOutput[i] = vectorOutput[i] - 1  # subtract if the bit is 0
+            else:
+                vectorOutput[i] = vectorOutput[i] + 1  # add if the bit is 1
+
+    fingerprint = []
+    for i in range(len(vectorOutput)):
+        if vectorOutput[i] < 0:
+            fingerprint[i] = 0
+        else:
+            fingerprint[i] = 1
+
+    return fingerprint
+
+def calculateSimilarity(simOne, simTwo):
+    counter = 0
+    for i in range(16):
+        if simOne[i] == simTwo[i]:
+            counter += 1
+    counter /= 16
+    return counter
