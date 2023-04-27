@@ -3,6 +3,11 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import hashlib
 
+uniqueWebsites = 0``
+crawled = {}
+longestPage = 0
+subdomains = {}
+
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
@@ -75,8 +80,21 @@ def extract_next_links(url, resp):
                     else:
                             absPath = url + absPath
 
-                if not url in absPath:
-                    links.append(absPath)
+                if '#' in absPath:
+                    absPath = absPath[0 : absPath.index('#')]
+
+                # add exact and near duplication with simHash
+                hashURL = getTokenHash(url)
+                if hashURL in crawled:              # decide if we need to hash the url for near duplicate urls
+                    return list()
+                else:
+                    tokenList = tokenize(soup.text)
+                    hashTokenList = simHash(tokenList)
+                    # add simHash and similarity checking for the contents of the website
+            
+                # add unique counting and other report requirements
+
+                links.append(absPath)
 
         for link in links:
             output.write(link + '\n')
@@ -142,6 +160,7 @@ def computeTokenFrequencies(tokenList):
                  'we\'ll', 'we\'re', 'we\'ve', 'were', 'weren\'t', 'what', 'what\'s', 'when', 'when\'s', 'where', 'where\'s',
                  'which', 'while', 'who', 'who\'s', 'whom', 'why', 'why\'s', 'with', 'won\'t', 'would', 'wouldn\'t', 'you',
                  'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves']
+
     for token in tokenList:
         if token not in stopWords:
             if token in freq.keys():
@@ -152,9 +171,8 @@ def computeTokenFrequencies(tokenList):
 
 def getTokenHash(inputStr):
     hash = hashlib.sha256(inputStr.encode('utf-8')).digest() #hashes
-    binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(256) #converts into binary
+    binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(17) #converts into binary
     return binaryHash[:16] #returns the first 16 bits
-
 
 def simHash(tokenList):
     vectorOutput = [0] * 16  # initialize output vector
