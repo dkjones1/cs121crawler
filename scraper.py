@@ -151,10 +151,9 @@ def computeTokenFrequencies(tokenList):
     return freq
 
 def getTokenHash(inputStr):
-    hash = hashlib.sha256(inputStr.encode('utf-8')).digest()  # hash the string using SHA256 algorithm
-    # convert hash value to binary representation with leading zeros
-    binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(256)
-    return binaryHash[:16]  # take the first 16 bits of the binary representation
+    hash = hashlib.sha256(inputStr.encode('utf-8')).digest() #hashes
+    binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(256) #converts into binary
+    return binaryHash[:16] #returns the first 16 bits
 
 
 def simHash(tokenList):
