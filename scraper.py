@@ -168,7 +168,7 @@ def simHash(tokenList):
 
     fingerprint = []
     for i in range(len(vectorOutput)):
-        if vectorOutput[i] < 0:
+        if vectorOutput[i] <= 0:
             fingerprint[i] = 0
         else:
             fingerprint[i] = 1
