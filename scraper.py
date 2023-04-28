@@ -127,8 +127,7 @@ def extract_next_links(url, resp):
                 if(len(tokenList) > longestPage):
                     longestPage = len(tokenList)
                     computeTokenFrequencies(tokenList)
-                    freq = dict(sorted(freq.items(), key=lambda k: (-k[1], k[0])))
-                
+
                 links.append(absPath)
         
         if not ('www.ics.uci.edu' in url or 'www.informatics.uci.edu' in url or 'www.cs.uci.edu' in url or 'www.stat.uci.edu' in url):
@@ -138,9 +137,9 @@ def extract_next_links(url, resp):
             else:
                 subdomains[sub] = 1
 
-        for link in links:
-            output.write(link + '\n')
-        output.write('-------------------------------------------------------------------\n')
+        if (resp.status >= 300 and resp.status < 400)
+            output.write(url + '\n' + resp.url + '\n' + resp.raw_response.url)
+            output.write('\n-------------------------------------------------------------------\n')
 
     return links
 
@@ -202,7 +201,6 @@ def tokenize(contents):
 
 # frequency method from Assignment 1
 def computeTokenFrequencies(tokenList):
-    #freq = {}
     stopWords = ['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'aren\'t',
                  'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',
                  'can\'t', 'cannot', 'could', 'couldn\'t', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t',
@@ -261,6 +259,7 @@ def calculateSimilarity(simOne, simTwo):
 
 def writeReport():
     with open('report.txt', 'w+') as report:
+        freq = dict(sorted(freq.items(), key=lambda k: (-k[1], k[0])))
         topFiftyDict = dict(list(freq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
         for key, value in topFiftyDict.items():
             report.write('%s %s\n' % (key, value))
