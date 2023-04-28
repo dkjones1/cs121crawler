@@ -216,11 +216,11 @@ def simHash(tokenList):
                 vectorOutput[i] = vectorOutput[i] + 1  # add if the bit is 1
 
     fingerprint = []
-    for i in range(len(vectorOutput)):
+    for i in range(16):
         if vectorOutput[i] <= 0:
-            fingerprint[i] = 0
+            fingerprint.append(0)
         else:
-            fingerprint[i] = 1
+            fingerprint.append(1)
 
     return fingerprint
 
