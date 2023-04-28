@@ -156,11 +156,11 @@ def is_valid(url):
         
 
         # regex to check if the url is within the ics/cs/inf/stats domains
-        regOutput = re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
-        global crawled
-        if (regOutput):
-            if url not in crawled:
-                crawled.append(url)
+        inDomain = re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
+        global crawledURL
+        if (inDomain):
+            if url not in crawledURL:
+                crawledURL.append(url)
                 return True
         else:
             return False
