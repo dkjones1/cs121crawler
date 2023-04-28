@@ -1,3 +1,4 @@
+from enum import unique
 import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
@@ -99,6 +100,8 @@ def extract_next_links(url, resp):
                     #hashTokenList = simHash(tokenList)
                     # add simHash and similarity checking for the contents of the website
                     global longestPage
+                    global freq
+                    global uniqueWebsites
                     if(len(tokenList) > longestPage):
                         longestPage = len(tokenList)
                     computeTokenFrequencies(tokenList)
@@ -154,6 +157,7 @@ def is_valid(url):
 
         # regex to check if the url is within the ics/cs/inf/stats domains
         regOutput = re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
+        global crawled
         if (regOutput):
             if url not in crawled:
                 crawled.add(url)
