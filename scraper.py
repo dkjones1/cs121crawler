@@ -117,7 +117,7 @@ def extract_next_links(url, resp):
         output.write('-------------------------------------------------------------------\n')
     with open('report.txt', 'w+') as report:
         topFiftyDict = dict(list(freq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
-        for key, value in topFiftyDict: 
+        for key, value in topFiftyDict.items():
             report.write('%s %s\n' % (key, value))
         for i in range(5):
             report.write("\n")
