@@ -215,9 +215,9 @@ def simHash(tokenList):
     fingerprint = []
     for i in range(16):
         if vectorOutput[i] <= 0:
-            fingerprint.append(0)
+            fingerprint.append('0')
         else:
-            fingerprint.append(1)
+            fingerprint.append('1')
 
     return ''.join(fingerprint)
 
