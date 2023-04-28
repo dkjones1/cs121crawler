@@ -45,17 +45,19 @@ def extract_next_links(url, resp):
         global crawledSites
         global subdomains
 
+        hashURL = getTokenHash(url)
         if '#' in url:
             uniqueURL = url[0:url.index('#')]
             uniqueURLHash = getTokenHash(uniqueURL)
-
-        if uniqueURLHash not in crawledURL:
-            uniqueWebsites += 1
+            if uniqueURLHash not in crawledURL:
+                uniqueWebsites += 1
+        else:
+            if hashURL not in crawledURL:
+                uniqueWebsites += 1
 
         if (resp.raw_response == None):
             return list()
 
-        hashURL = getTokenHash(url)
         if hashURL not in crawledURL:
             total = 0
             for hashedURL in crawledURL[-25:]:
