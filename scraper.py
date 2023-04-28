@@ -64,24 +64,24 @@ def extract_next_links(url, resp):
 
         if hashURL not in crawledURL:
             total = 0
-            crawledURL.append(hashURL)
             for hashedURL in crawledURL[-25:]:
                 total += calculateSimilarity(hashURL, hashedURL)
                 total /= 25
                 if total >= 0.85:
                     return list()
+            crawledURL.append(hashURL)
         else:
             return list()
 
         hashContent = simHash(tokenList)
         if hashContent not in crawledSites:
             total = 0
-            crawledSites.append(hashContent)
             for hashedContent in crawledSites[-25:]:
                 total += calculateSimilarity(hashContent, hashedContent)
                 total /= 25
                 if total >= 0.80:
                     return list()
+            crawledSites.append(hashContent)
         else:
             return list()
 
@@ -126,18 +126,6 @@ def extract_next_links(url, resp):
         for link in links:
             output.write(link + '\n')
         output.write('-------------------------------------------------------------------\n')
-
-        
-    with open('report.txt', 'w+') as report:
-        topFiftyDict = dict(list(freq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
-        for key, value in topFiftyDict.items():
-            report.write('%s %s\n' % (key, value))
-        for i in range(5):
-            report.write("\n")
-        report.write("Longest Page: " + str(longestPage))
-        report.write("\nUnique Websites: " + str(uniqueWebsites))
-        
-
 
     return links
 
@@ -250,3 +238,13 @@ def calculateSimilarity(simOne, simTwo):
             counter += 1
     counter /= 32
     return counter
+
+def writeReport():
+    with open('report.txt', 'w+') as report:
+        topFiftyDict = dict(list(freq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
+        for key, value in topFiftyDict.items():
+            report.write('%s %s\n' % (key, value))
+        for i in range(5):
+            report.write("\n")
+        report.write("Longest Page: " + str(longestPage))
+        report.write("\nUnique Websites: " + str(uniqueWebsites))
