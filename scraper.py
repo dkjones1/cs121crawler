@@ -55,12 +55,12 @@ def extract_next_links(url, resp):
         tokenList = tokenize(soup.text)
         
         #filter out low value urls
-        if len(tokenList) < 200: 
+        if len(tokenList) < 100: 
             return list()
 
         # filter out large websites by character to avoid tokenizing a large website
-        if len(soup.text) > 4700:
-            return list()
+        #if len(soup.text) > 4700:
+        #    return list()
 
         if hashURL not in crawledURL:
             total = 0
@@ -68,7 +68,7 @@ def extract_next_links(url, resp):
             for hashedURL in crawledURL[-25:]:
                 total += calculateSimilarity(hashURL, hashedURL)
                 total /= 25
-                if total >= 0.90:
+                if total >= 0.92:
                     return list()
         else:
             return list()
@@ -80,7 +80,7 @@ def extract_next_links(url, resp):
             for hashedContent in crawledSites[-25:]:
                 total += calculateSimilarity(hashContent, hashedContent)
                 total /= 25
-                if total >= 0.80:
+                if total >= 0.85:
                     return list()
         else:
             return list()
@@ -91,7 +91,7 @@ def extract_next_links(url, resp):
         parsed = urlparse(resp.url)
         for link in tags:
             if link.has_attr('href'):
-                absPath = link['href']
+                absPath = link['href'].strip()
                 if not absPath.startswith('http'):
 
                     if absPath.startswith('www.'):
