@@ -4,12 +4,12 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import hashlib
 
-uniqueWebsites = 0
-crawledURL = []
-crawledSites = []
-longestPage = 0
-subdomains = {}
-freq = {}
+uniqueWebsites = 0      # number of unique websites
+crawledURL = []         # list of hashed url visited
+crawledSites = []       # list of hashed websites visited
+longestPage = 0         # length of webpage by word
+subdomains = {}         # key: subdomain, value: number of pages under the subdomain
+freq = {}               # dictionary holding common words between all websites
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -25,33 +25,11 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-
-    # had error while running: couldnt decode character so it was replaced with replacement character
+    
 
     # write status and contents to output file so I can see what exactly the resp does and error codes
     # error codes split into pieces so I can read it easily
     with open('output.txt', 'a+') as output:
-        
-        '''
-        if (resp.status >= 200 and resp.status < 400):
-            output.write(str(resp.status) + "\n" + url + "\n")
-
-        # probably doesnt work
-        elif resp.status == 404:
-            return list()
-
-        elif (resp.status >= 400 and resp.status <= 599):
-            output.write(str(resp.status) + "\n" + url + "\n")
-
-        # if error occurs between 600 and 606 (got error for 607), skip the current website
-        elif resp.status >= 600:
-            output.write(str(resp.status) + "\n" + url + "\n")
-            return list()
-
-        # just in case if instructions did not mention another code that could occur
-        else:
-            output.write(str(resp.status) + "\n" + url + "\n")
-        '''
 
         if resp.status != 200:
             output.write(str(resp.status) + "\n" + url + "\n")
@@ -59,20 +37,52 @@ def extract_next_links(url, resp):
         if resp.status == 400:
             return list()
 
-        # add simhash to check similarity
-        # needs data structure to hold the hash values
 
         global longestPage
         global freq
         global uniqueWebsites
         global crawledURL
         global crawledSites
+        global subdomains
 
         if (resp.raw_response == None):
             uniqueWebsites = uniqueWebsites + 1
             return list()
 
+        hashURL = getTokenHash(url)
+        if hashURL not in crawledURL:
+            total = 0
+            for hashedURL in crawledURL[-25:]:
+                total += calculateSimilarity(hashURL, hashedURL)
+                total /= 25
+                if total >= 0.95:
+                    return list()
+        else:
+            return list()
+
         soup = BeautifulSoup(resp.raw_response.content, "lxml")
+        tokenList = tokenize(soup.text)
+        
+        #filter out low value urls
+        if len(tokenList) < 200: 
+            return list()
+
+        # filter out large websites by character to avoid tokenizing a large website
+        if len(soup.text) > 4700:
+            return list()
+
+        hashContent = simHash(tokenList)
+        if hashContent not in crawledSites:
+            total = 0
+            for hashedContent in crawledSites[-25:]:
+                total += calculateSimilarity(hashContent, hashedContent)
+                total /= 25
+                if total >= 0.90:
+                    return list()
+        else:
+            return list()
+
+
         tags = soup.find_all('a')
         links = []
         for link in tags:
@@ -93,53 +103,24 @@ def extract_next_links(url, resp):
                     else:
                             absPath = parsed.scheme + '://' + parsed.netloc + absPath
 
+                #remove fragment
                 if '#' in absPath:
                     absPath = absPath[0 : absPath.index('#')]
 
-
-                hashURL = simHash([url])
-                if hashURL not in crawledURL:
-                    total = 0
-                    for hashedURL in crawledURL[-25:]:
-                        total += calculateSimilarity(hashURL, hashedURL)
-                        total /= 25
-                        if total >= 0.95:
-                            return list()
-                else:
-                    return list()
-
-                tokenList = tokenize(soup.text)
-                hashContent = simHash(tokenList)
-                if hashContent not in crawledSites:
-                    total = 0
-                    for hashedContent in crawledSites[-25:]:
-                        total += calculateSimilarity(hashContent, hashedContent)
-                        total /= 25
-                        if total >= 0.90:
-                            return list()
-                else:
-                    return list()
-
-                # add exact and near duplication with simHash
-                #hashURL = getTokenHash(url)
-                
-                if hashTokenList in crawledSites:              # decide if we need to hash the url for near duplicate urls
-                    return list()
-
-                else:
-                    #tokenList = tokenize(soup.text)
-                    #hashTokenList = simHash(tokenList)
-                    # add simHash and similarity checking for the contents of the website
-                    if(len(tokenList) > longestPage):
-                        longestPage = len(tokenList)
+                if(len(tokenList) > longestPage):
+                    longestPage = len(tokenList)
                     computeTokenFrequencies(tokenList)
                     freq = dict(sorted(freq.items(), key=lambda k: (-k[1], k[0])))
                     uniqueWebsites = uniqueWebsites + 1
                 
-            
-                # add unique counting and other report requirements
-
                 links.append(absPath)
+        
+        if not ('www.ics.uci.edu' in url or 'www.informatics.uci.edu' in url or 'www.cs.uci.edu' in url or 'www.stat.uci.edu' in url):
+            sub = parsed.scheme + '://' + parsed.netloc
+            if sub in subdomains.keys():
+                subdomains[sub] += 1
+            else:
+                subdomains[sub] = 1
 
         for link in links:
             output.write(link + '\n')
