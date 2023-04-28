@@ -135,7 +135,7 @@ def extract_next_links(url, resp):
         for i in range(5):
             report.write("\n")
         report.write("Longest Page: " + str(longestPage))
-        report.write("Unique Websites: " + str(uniqueWebsites))
+        report.write("\nUnique Websites: " + str(uniqueWebsites))
         
 
 
