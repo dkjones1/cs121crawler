@@ -62,7 +62,7 @@ def extract_next_links(url, resp):
         # url similarity checker using simhash
         # checks if the hash of the current url is in a list of hashed urls previously crawled.
         # loops through the previous 25 websites to add the similarity with the current url.
-        # averages the siilarity and checks if it is above the threshold to decide to whether
+        # averages the siilarity and checks if it is above the threshold to decide whether
         # to parse the url or not. appends hash of current url to lsit of crawled hashed urls.
         if hashURL not in crawledURL:
             total = 0
@@ -137,7 +137,7 @@ def extract_next_links(url, resp):
             else:
                 subdomains[sub] = 1
 
-        if (resp.status >= 300 and resp.status < 400)
+        if (resp.status >= 300 and resp.status < 400):
             output.write(url + '\n' + resp.url + '\n' + resp.raw_response.url)
             output.write('\n-------------------------------------------------------------------\n')
 
