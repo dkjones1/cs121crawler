@@ -116,9 +116,9 @@ def extract_next_links(url, resp):
         for key, value in freq: 
             report.write('%s %s\n' % (key, value))
         for i in range(5):
-            print("\n")
-        print("Longest Page: " +longestPage)
-        print("Unique Webistes: " +uniqueWebsites)
+            report.write("\n")
+        report.write("Longest Page: " +longestPage)
+        report.write("Unique Webistes: " +uniqueWebsites)
 
 
     return links
