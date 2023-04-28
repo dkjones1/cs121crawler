@@ -98,6 +98,7 @@ def extract_next_links(url, resp):
                     #tokenList = tokenize(soup.text)
                     #hashTokenList = simHash(tokenList)
                     # add simHash and similarity checking for the contents of the website
+                    global longestPage
                     if(len(tokenList) > longestPage):
                         longestPage = len(tokenList)
                     computeTokenFrequencies(tokenList)
