@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 import hashlib
 
 uniqueWebsites = 0
-crawled = {}
-hashedSites = {}
+crawledURL = []
+crawledSites = []
 longestPage = 0
 subdomains = {}
 freq = {}
@@ -92,7 +92,7 @@ def extract_next_links(url, resp):
                 hashTokenList = simHash(tokenList)
                 # add exact and near duplication with simHash
                 #hashURL = getTokenHash(url)
-                if hashTokenList in hashedSites:              # decide if we need to hash the url for near duplicate urls
+                if hashTokenList in crawledSites:              # decide if we need to hash the url for near duplicate urls
                     return list()
 
                 else:
