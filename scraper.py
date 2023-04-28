@@ -219,7 +219,7 @@ def simHash(tokenList):
         else:
             fingerprint.append(1)
 
-    return fingerprint
+    return ''.join(fingerprint)
 
 def calculateSimilarity(simOne, simTwo):
     counter = 0
