@@ -25,33 +25,30 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    
+
+    # global variables for report
     global longestPage
     global freq
-    global uniqueWebsites
     global crawledURL
     global crawledSites
     global subdomains
-    
+
     with open('output.txt', 'a+') as output:
 
-        if resp.status != 200:
+        # codes in 300 means redirect, 200 means fine, everything outside that range means it is not a good website
+        if not(resp.status < 200 and resp.status >= 400):
             return list()
 
+        # hash the url to store/compare
         hashURL = getTokenHash(resp.url)
-        if '#' in resp.url:
-            uniqueURL = url[0:resp.url.index('#')]
-            uniqueURLHash = getTokenHash(uniqueURL)
-            if uniqueURLHash not in crawledURL:
-                uniqueWebsites += 1
-        else:
-            if hashURL not in crawledURL:
-                uniqueWebsites += 1
 
+        # if the website is empty/None then do not parse
         if (resp.raw_response == None):
             return list()
 
+        # BeautifulSoup object to get the contents of the website
         soup = BeautifulSoup(resp.raw_response.content.decode('utf-8', 'ignore'), "html.parser")
+        # tokenize the contents of the website
         tokenList = tokenize(soup.text)
         
         #filter out low value urls
@@ -62,36 +59,54 @@ def extract_next_links(url, resp):
         #if len(soup.text) > 4700:
         #    return list()
 
+        # url similarity checker using simhash
+        # checks if the hash of the current url is in a list of hashed urls previously crawled.
+        # loops through the previous 25 websites to add the similarity with the current url.
+        # averages the siilarity and checks if it is above the threshold to decide to whether
+        # to parse the url or not. appends hash of current url to lsit of crawled hashed urls.
         if hashURL not in crawledURL:
             total = 0
             for hashedURL in crawledURL[-25:]:
                 total += calculateSimilarity(hashURL, hashedURL)
                 total /= 25
-                if total >= 0.85:
+                if total >= 0.90:
                     return list()
             crawledURL.append(hashURL)
         else:
             return list()
 
+        # content similarity checker using simhash
+        # similar to the url similarity checker. checks if contents are
+        # the same by hashing the tokens and checking the hash in the list
+        # of hashed website contents that were already crawled. check the
+        # previous 25 hashed website contents and calculate the similarity
+        # of the 25. take the average of the similarity and don't parse the
+        # current website if the similarity is above the threshold. append
+        # the hashed website content to the list of hashed contents.
         hashContent = simHash(tokenList)
         if hashContent not in crawledSites:
             total = 0
             for hashedContent in crawledSites[-25:]:
                 total += calculateSimilarity(hashContent, hashedContent)
                 total /= 25
-                if total >= 0.80:
+                if total >= 0.85:
                     return list()
             crawledSites.append(hashContent)
         else:
             return list()
 
-
+        # finds all the html tags with <a>, these can hold links
         tags = soup.find_all('a')
+        # list to hold all the links on the current website
         links = []
+        # tuple holding the different parts of the url, used for relative paths
         parsed = urlparse(resp.url)
         for link in tags:
+            # if the <a> tag element has a link (href)
             if link.has_attr('href'):
                 absPath = link['href'].strip()
+                # detecting for relative path urls
+                # missing http
                 if not absPath.startswith('http'):
 
                     if absPath.startswith('www.'):
@@ -134,10 +149,12 @@ def is_valid(url):
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
+        global uniqueWebsites
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
 
+        # maybe add php, TA said to add php but I think some php sites worked
         website = re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -158,17 +175,20 @@ def is_valid(url):
         
 
         # regex to check if the url is within the ics/cs/inf/stats domains
-        return re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
-        '''
         inDomain = re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
-        global crawledURL
+
         if (inDomain):
-            if url not in crawledURL:
-                crawledURL.append(url)
+            hashURL = getTokenHash(url)
+            if '#' in resp.url:
+                url = url[0:resp.url.index('#')]
+            urlHash = getTokenHash(url)
+            if urlHash not in crawledURL:
+                uniqueWebsites += 1
                 return True
+            else:
+                return False
         else:
             return False
-        '''
 
     except TypeError:
         print ("TypeError for ", parsed)
