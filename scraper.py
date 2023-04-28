@@ -3,10 +3,12 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import hashlib
 
-uniqueWebsites = 0``
+uniqueWebsites = 0
 crawled = {}
+hashedSites = {}
 longestPage = 0
 subdomains = {}
+freq = {}
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -83,14 +85,24 @@ def extract_next_links(url, resp):
                 if '#' in absPath:
                     absPath = absPath[0 : absPath.index('#')]
 
+                
+
+                tokenList = tokenize(soup.text)
+                hashTokenList = simHash(tokenList)
                 # add exact and near duplication with simHash
-                hashURL = getTokenHash(url)
-                if hashURL in crawled:              # decide if we need to hash the url for near duplicate urls
+                #hashURL = getTokenHash(url)
+                if hashTokenList in hashedSites:              # decide if we need to hash the url for near duplicate urls
                     return list()
+
                 else:
-                    tokenList = tokenize(soup.text)
-                    hashTokenList = simHash(tokenList)
+                    #tokenList = tokenize(soup.text)
+                    #hashTokenList = simHash(tokenList)
                     # add simHash and similarity checking for the contents of the website
+                    if(len(tokenList) > longestPage):
+                        longestPage = len(tokenList)
+                    computeTokenFrequencies(tokenList)
+                    freq = sorted(freq.items(), key=lambda k: (-k[1], k[0]))
+                    uniqueWebsites = uniqueWebsites + 1
             
                 # add unique counting and other report requirements
 
@@ -99,6 +111,15 @@ def extract_next_links(url, resp):
         for link in links:
             output.write(link + '\n')
         output.write('-------------------------------------------------------------------\n')
+    with open('report.txt', 'w') as report:
+        topFiftyDict = dict(list(freq.items())[0: 50]) #idk if it works
+        for key, value in freq: 
+            report.write('%s %s\n' % (key, value))
+        for i in range(5):
+            print("\n")
+        print("Longest Page: " +longestPage)
+        print("Unique Webistes: " +uniqueWebsites)
+
 
     return links
 
@@ -128,9 +149,19 @@ def is_valid(url):
 
         if mail:
             return False
+        
 
         # regex to check if the url is within the ics/cs/inf/stats domains
         return re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
+        """
+        regOutput = re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
+        if (regOutput):
+            if url in crawled:
+                crawled.add(url)
+                return True
+        else:
+            return False
+        """
 
     except TypeError:
         print ("TypeError for ", parsed)
@@ -144,7 +175,7 @@ def tokenize(contents):
 
 # frequency method from Assignment 1
 def computeTokenFrequencies(tokenList):
-    freq = {}
+    #freq = {}
     stopWords = ['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'aren\'t',
                  'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',
                  'can\'t', 'cannot', 'could', 'couldn\'t', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t',
