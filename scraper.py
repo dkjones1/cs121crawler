@@ -26,28 +26,21 @@ def extract_next_links(url, resp):
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
     
-
-    # write status and contents to output file so I can see what exactly the resp does and error codes
-    # error codes split into pieces so I can read it easily
+    global longestPage
+    global freq
+    global uniqueWebsites
+    global crawledURL
+    global crawledSites
+    global subdomains
+    
     with open('output.txt', 'a+') as output:
 
         if resp.status != 200:
-            output.write(str(resp.status) + "\n" + url + "\n")
-
-        if resp.status == 400:
             return list()
 
-
-        global longestPage
-        global freq
-        global uniqueWebsites
-        global crawledURL
-        global crawledSites
-        global subdomains
-
-        hashURL = getTokenHash(url)
-        if '#' in url:
-            uniqueURL = url[0:url.index('#')]
+        hashURL = getTokenHash(resp.url)
+        if '#' in resp.url:
+            uniqueURL = url[0:resp.url.index('#')]
             uniqueURLHash = getTokenHash(uniqueURL)
             if uniqueURLHash not in crawledURL:
                 uniqueWebsites += 1
@@ -58,17 +51,7 @@ def extract_next_links(url, resp):
         if (resp.raw_response == None):
             return list()
 
-        if hashURL not in crawledURL:
-            total = 0
-            for hashedURL in crawledURL[-25:]:
-                total += calculateSimilarity(hashURL, hashedURL)
-                total /= 25
-                if total >= 0.95:
-                    return list()
-        else:
-            return list()
-
-        soup = BeautifulSoup(resp.raw_response.content.decode('utf-8', 'ignore'), "lxml")
+        soup = BeautifulSoup(resp.raw_response.content.decode('utf-8', 'ignore'), "html.parser")
         tokenList = tokenize(soup.text)
         
         #filter out low value urls
@@ -79,13 +62,25 @@ def extract_next_links(url, resp):
         if len(soup.text) > 4700:
             return list()
 
+        if hashURL not in crawledURL:
+            total = 0
+            crawledURL.append(hashURL)
+            for hashedURL in crawledURL[-25:]:
+                total += calculateSimilarity(hashURL, hashedURL)
+                total /= 25
+                if total >= 0.90:
+                    return list()
+        else:
+            return list()
+
         hashContent = simHash(tokenList)
         if hashContent not in crawledSites:
             total = 0
+            crawledSites.append(hashContent)
             for hashedContent in crawledSites[-25:]:
                 total += calculateSimilarity(hashContent, hashedContent)
                 total /= 25
-                if total >= 0.90:
+                if total >= 0.80:
                     return list()
         else:
             return list()
@@ -112,7 +107,7 @@ def extract_next_links(url, resp):
                         absPath = parsed.scheme + ':' + absPath
 
                     else:
-                            absPath = parsed.scheme + '://' + parsed.netloc + absPath
+                        absPath = parsed.scheme + '://' + parsed.netloc + absPath
 
                 if(len(tokenList) > longestPage):
                     longestPage = len(tokenList)
@@ -140,7 +135,7 @@ def extract_next_links(url, resp):
         for i in range(5):
             report.write("\n")
         report.write("Longest Page: " + str(longestPage))
-        report.write("Unique Webistes: " + str(uniqueWebsites))
+        report.write("Unique Websites: " + str(uniqueWebsites))
         
 
 
