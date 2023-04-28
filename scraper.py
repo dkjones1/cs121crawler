@@ -66,7 +66,7 @@ def extract_next_links(url, resp):
         global freq
         global uniqueWebsites
 
-        if (resp.raw_response.content == None):
+        if (resp.raw_response == None):
             uniqueWebsites = uniqueWebsites + 1
             return list()
 
