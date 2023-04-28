@@ -81,7 +81,7 @@ def extract_next_links(url, resp):
                             absPath = parsed.scheme + absPath
 
                     else:
-                            absPath = url + absPath
+                            absPath = parsed.scheme + '://' + parsed.netloc + absPath
 
                 if '#' in absPath:
                     absPath = absPath[0 : absPath.index('#')]
@@ -172,7 +172,7 @@ def is_valid(url):
 # tokenizer method from Assignment 1
 def tokenize(contents):
 
-    words = re.findall(r'[a-z0-9]+', contents)
+    words = re.findall(r'[a-z0-9]+', contents.lower())
     return words
 
 # frequency method from Assignment 1
