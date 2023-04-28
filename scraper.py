@@ -62,7 +62,15 @@ def extract_next_links(url, resp):
         # add simhash to check similarity
         # needs data structure to hold the hash values
 
-        soup = BeautifulSoup(resp.raw_response.content, "html.parser")
+        global longestPage
+        global freq
+        global uniqueWebsites
+
+        if (resp.raw_response.content == None):
+            uniqueWebsites = uniqueWebsites + 1
+            return list()
+
+        soup = BeautifulSoup(resp.raw_response.content, "lxml")
         tags = soup.find_all('a')
         links = []
         for link in tags:
@@ -99,9 +107,6 @@ def extract_next_links(url, resp):
                     #tokenList = tokenize(soup.text)
                     #hashTokenList = simHash(tokenList)
                     # add simHash and similarity checking for the contents of the website
-                    global longestPage
-                    global freq
-                    global uniqueWebsites
                     if(len(tokenList) > longestPage):
                         longestPage = len(tokenList)
                     computeTokenFrequencies(tokenList)
