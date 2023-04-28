@@ -160,7 +160,7 @@ def is_valid(url):
         global crawled
         if (regOutput):
             if url not in crawled:
-                crawled.add(url)
+                crawled.append(url)
                 return True
         else:
             return False
