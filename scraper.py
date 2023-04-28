@@ -105,7 +105,7 @@ def extract_next_links(url, resp):
                     if(len(tokenList) > longestPage):
                         longestPage = len(tokenList)
                     computeTokenFrequencies(tokenList)
-                    freq = sorted(freq.items(), key=lambda k: (-k[1], k[0]))
+                    freq = dict(sorted(freq.items(), key=lambda k: (-k[1], k[0])))
                     uniqueWebsites = uniqueWebsites + 1
             
                 # add unique counting and other report requirements
@@ -117,7 +117,7 @@ def extract_next_links(url, resp):
         output.write('-------------------------------------------------------------------\n')
     with open('report.txt', 'w+') as report:
         topFiftyDict = dict(list(freq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
-        for key, value in freq: 
+        for key, value in topFiftyDict: 
             report.write('%s %s\n' % (key, value))
         for i in range(5):
             report.write("\n")
