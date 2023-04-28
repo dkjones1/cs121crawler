@@ -65,6 +65,8 @@ def extract_next_links(url, resp):
         global longestPage
         global freq
         global uniqueWebsites
+        global crawledURL
+        global crawledSites
 
         if (resp.raw_response == None):
             uniqueWebsites = uniqueWebsites + 1
@@ -94,10 +96,19 @@ def extract_next_links(url, resp):
                 if '#' in absPath:
                     absPath = absPath[0 : absPath.index('#')]
 
-                
+
+                hashURL = simHash(url)
+                if hashURL not in crawledURL:
+                    total = 0
+                    for hashedURL in crawledURL[-50:]:
+                        total += calculateSimilarity(hashURL, hashedURL)
+                        total /= 50
+                        if total >= 0.95:
+                            return list()
 
                 tokenList = tokenize(soup.text)
-                hashTokenList = simHash(tokenList)
+                hashContent = simHash(tokenList)
+                
                 # add exact and near duplication with simHash
                 #hashURL = getTokenHash(url)
                 """
@@ -166,6 +177,8 @@ def is_valid(url):
         
 
         # regex to check if the url is within the ics/cs/inf/stats domains
+        return re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
+        '''
         inDomain = re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
         global crawledURL
         if (inDomain):
@@ -174,6 +187,7 @@ def is_valid(url):
                 return True
         else:
             return False
+        '''
 
     except TypeError:
         print ("TypeError for ", parsed)
