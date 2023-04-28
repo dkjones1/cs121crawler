@@ -100,6 +100,7 @@ def extract_next_links(url, resp):
                 hashTokenList = simHash(tokenList)
                 # add exact and near duplication with simHash
                 #hashURL = getTokenHash(url)
+                """
                 if hashTokenList in crawledSites:              # decide if we need to hash the url for near duplicate urls
                     return list()
 
@@ -112,6 +113,7 @@ def extract_next_links(url, resp):
                     computeTokenFrequencies(tokenList)
                     freq = dict(sorted(freq.items(), key=lambda k: (-k[1], k[0])))
                     uniqueWebsites = uniqueWebsites + 1
+                """
             
                 # add unique counting and other report requirements
 
@@ -120,6 +122,8 @@ def extract_next_links(url, resp):
         for link in links:
             output.write(link + '\n')
         output.write('-------------------------------------------------------------------\n')
+
+        """
     with open('report.txt', 'w+') as report:
         topFiftyDict = dict(list(freq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
         for key, value in topFiftyDict.items():
@@ -128,6 +132,7 @@ def extract_next_links(url, resp):
             report.write("\n")
         report.write("Longest Page: " + str(longestPage))
         report.write("Unique Webistes: " + str(uniqueWebsites))
+        """
 
 
     return links
