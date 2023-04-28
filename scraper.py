@@ -97,18 +97,29 @@ def extract_next_links(url, resp):
                     absPath = absPath[0 : absPath.index('#')]
 
 
-                hashURL = simHash(url)
+                hashURL = simHash([url])
                 if hashURL not in crawledURL:
                     total = 0
-                    for hashedURL in crawledURL[-50:]:
+                    for hashedURL in crawledURL[-25:]:
                         total += calculateSimilarity(hashURL, hashedURL)
-                        total /= 50
+                        total /= 25
                         if total >= 0.95:
                             return list()
+                else:
+                    return list()
 
                 tokenList = tokenize(soup.text)
                 hashContent = simHash(tokenList)
-                
+                if hashContent not in crawledSites:
+                    total = 0
+                    for hashedContent in crawledSites[-25:]:
+                        total += calculateSimilarity(hashContent, hashedContent)
+                        total /= 25
+                        if total >= 0.90:
+                            return list()
+                else:
+                    return list()
+
                 # add exact and near duplication with simHash
                 #hashURL = getTokenHash(url)
                 
@@ -228,21 +239,21 @@ def computeTokenFrequencies(tokenList):
 
 def getTokenHash(inputStr):
     hash = hashlib.sha256(inputStr.encode('utf-8')).digest() #hashes
-    binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(17) #converts into binary
-    return binaryHash[:16] #returns the first 16 bits
+    binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(32) #converts into binary
+    return binaryHash[:32] #returns the first 32 bits
 
 def simHash(tokenList):
-    vectorOutput = [0] * 16  # initialize output vector
+    vectorOutput = [0] * 32  # initialize output vector
     for token in tokenList:
         hashedToken = getTokenHash(token)  # hash every token
-        for i in range(16):  # 16 is the number of bits that are returned from the hash
+        for i in range(32):  # 32 is the number of bits that are returned from the hash
             if (hashedToken[i] == '0'):
                 vectorOutput[i] = vectorOutput[i] - 1  # subtract if the bit is 0
             else:
                 vectorOutput[i] = vectorOutput[i] + 1  # add if the bit is 1
 
     fingerprint = []
-    for i in range(16):
+    for i in range(32):
         if vectorOutput[i] <= 0:
             fingerprint.append('0')
         else:
@@ -252,8 +263,8 @@ def simHash(tokenList):
 
 def calculateSimilarity(simOne, simTwo):
     counter = 0
-    for i in range(16):
+    for i in range(32):
         if simOne[i] == simTwo[i]:
             counter += 1
-    counter /= 16
+    counter /= 32
     return counter
