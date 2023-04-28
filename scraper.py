@@ -45,8 +45,14 @@ def extract_next_links(url, resp):
         global crawledSites
         global subdomains
 
+        if '#' in url:
+            uniqueURL = url[0:url.index('#')]
+            uniqueURLHash = getTokenHash(uniqueURL)
+
+        if uniqueURLHash not in crawledURL:
+            uniqueWebsites += 1
+
         if (resp.raw_response == None):
-            uniqueWebsites = uniqueWebsites + 1
             return list()
 
         hashURL = getTokenHash(url)
@@ -60,7 +66,7 @@ def extract_next_links(url, resp):
         else:
             return list()
 
-        soup = BeautifulSoup(resp.raw_response.content, "lxml")
+        soup = BeautifulSoup(resp.raw_response.content.decode('utf-8', 'ignore'), "lxml")
         tokenList = tokenize(soup.text)
         
         #filter out low value urls
@@ -85,11 +91,11 @@ def extract_next_links(url, resp):
 
         tags = soup.find_all('a')
         links = []
+        parsed = urlparse(resp.url)
         for link in tags:
             if link.has_attr('href'):
                 absPath = link['href']
                 if not absPath.startswith('http'):
-                    parsed = urlparse(url)
 
                     if absPath.startswith('www.'):
                         absPath = parsed.scheme + '://' + absPath
@@ -100,18 +106,16 @@ def extract_next_links(url, resp):
                     elif absPath.startswith('//www.'):
                             absPath = parsed.scheme + absPath
 
+                    elif absPath.startswith('//'):
+                        absPath = parsed.scheme + ':' + absPath
+
                     else:
                             absPath = parsed.scheme + '://' + parsed.netloc + absPath
-
-                #remove fragment
-                if '#' in absPath:
-                    absPath = absPath[0 : absPath.index('#')]
 
                 if(len(tokenList) > longestPage):
                     longestPage = len(tokenList)
                     computeTokenFrequencies(tokenList)
                     freq = dict(sorted(freq.items(), key=lambda k: (-k[1], k[0])))
-                    uniqueWebsites = uniqueWebsites + 1
                 
                 links.append(absPath)
         
@@ -152,7 +156,7 @@ def is_valid(url):
         website = re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
-            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
+            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|wp-content\/upload"
             + r"|ps|eps|tex|ppt|pptx|ppsx|doc|docx|xls|xlsx|names"
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
