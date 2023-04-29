@@ -54,6 +54,7 @@ def extract_next_links(url, resp):
         #    return list()
 
         # checks if current url has different url than what was passed in (redirect)
+        realURL = resp.url
         if (resp.raw_response.status_code >= 300 and resp.raw_response.status_code < 400):
             realURL = resp.raw_response.headers['Location']
 
