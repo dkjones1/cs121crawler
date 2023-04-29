@@ -39,7 +39,7 @@ def extract_next_links(url, resp):
     with open('output.txt', 'a+') as output:
 
         # codes in 300 means redirect, 200 means fine, everything outside that range means it is not a good website
-        if not(resp.status < 200 and resp.status >= 400):
+        if resp.status < 200 and resp.status >= 400:
             return list()
 
         # if the website is empty/None then do not parse
@@ -92,7 +92,7 @@ def extract_next_links(url, resp):
         # of the 25. take the average of the similarity and don't parse the
         # current website if the similarity is above the threshold. append
         # the hashed website content to the list of hashed contents.
-        hashContent = simHash(tokenList)
+        hashContent = simHash(hashTokenDict)
         if hashContent not in crawledSites:
             total = 0
             for hashedContent in crawledSites[-25:]:
