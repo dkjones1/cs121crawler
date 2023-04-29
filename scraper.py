@@ -76,7 +76,7 @@ def extract_next_links(url, resp):
             for hashedURL in crawledURL[-25:]:
                 total += calculateSimilarity(hashURL, hashedURL)
                 total /= 25
-                if total >= 0.90:
+                if total >= 0.95:
                     return list()
             crawledURL.append(hashURL)
         else:
@@ -110,12 +110,14 @@ def extract_next_links(url, resp):
             for hashedContent in crawledSites[-25:]:
                 total += calculateSimilarity(hashContent, hashedContent)
                 total /= 25
-                if total >= 0.85:
+                if total >= 0.90:
                     return list()
             crawledSites.append(hashContent)
         else:
             return list()
 
+        if (len(tokenList) > longestPage):
+            longestPage = len(tokenList)
         updateGlobalFrequency(tokenDict)
         uniqueWebsites += 1
 
@@ -151,10 +153,6 @@ def extract_next_links(url, resp):
                     else:
                         absPath = parsed.scheme + '://' + parsed.netloc + absPath
 
-                if(len(tokenList) > longestPage):
-                    longestPage = len(tokenList)
-                    computeTokenFrequencies(tokenList)
-
                 links.append(absPath)
         
         if not ('www.ics.uci.edu' in url or 'www.informatics.uci.edu' in url or 'www.cs.uci.edu' in url or 'www.stat.uci.edu' in url):
@@ -164,10 +162,10 @@ def extract_next_links(url, resp):
             else:
                 subdomains[sub] = 1
 
-        if (url != resp.url or url != resp.raw_response.url or resp.url != resp.raw_response.url):
-            output.write(str(resp.status) + '\n')
-            output.write(url + '\n' + resp.url + '\n' + resp.raw_response.url)
-            output.write('\n-------------------------------------------------------------------\n')
+
+        output.write(str(resp.status) + '\n')
+        output.write(url + '\n' + resp.url + '\n' + resp.raw_response.url)
+        output.write('\n-------------------------------------------------------------------\n')
 
     return links
 
