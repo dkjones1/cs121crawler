@@ -35,6 +35,7 @@ def extract_next_links(url, resp):
     global crawledURL
     global crawledSites
     global subdomains
+    global uniqueWebsites
 
     with open('output.txt', 'a+') as output:
 
@@ -60,6 +61,9 @@ def extract_next_links(url, resp):
             canonical = canonical['href']
             if (canonical != realURL):
                 realURL = canonical
+
+        if '#' in realURL:
+            realURL = url[0:url.index('#')]
 
         # url similarity checker using simhash
         # checks if the hash of the current url is in a list of hashed urls previously crawled.
@@ -113,15 +117,12 @@ def extract_next_links(url, resp):
             return list()
 
         updateGlobalFrequency(tokenDict)
+        uniqueWebsites += 1
 
         # finds all the html tags with <a>, these can hold links
         tags = soup.find_all('a')
         # list to hold all the links on the current website
         links = []
-
-        if '#' in realURL:
-            realURL = url[0:url.index('#')]
-            uniqueWebsites += 1
 
         # tuple holding the different parts of the url, used for relative paths
         parsed = urlparse(realURL)
@@ -175,7 +176,6 @@ def is_valid(url):
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
-        global uniqueWebsites
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
@@ -195,10 +195,8 @@ def is_valid(url):
             return False
 
         mail = re.match(r'.*(mailto).*', url)
-
         if mail:
             return False
-        
 
         # regex to check if the url is within the ics/cs/inf/stats domains
         return re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
@@ -284,6 +282,7 @@ def calculateSimilarity(simOne, simTwo):
 
 
 def updateGlobalFrequency(tokenFreqDict):
+    global freq
     for key, value in tokenFreqDict.items():
         if key in freq.keys():
             freq[key] = freq[key] + tokenFreqDict[key]
