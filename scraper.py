@@ -47,22 +47,18 @@ def extract_next_links(url, resp):
             return list()
 
         # BeautifulSoup object to get the contents of the website
-        soup = BeautifulSoup(resp.raw_response.content.decode('utf-8', 'ignore'), "html.parser")
+        soup = BeautifulSoup(resp.raw_response.text.decode('utf-8', 'ignore'), "html.parser")
 
         # filter out large websites by character to avoid tokenizing a large website
         #if len(soup.text) > 4700:
         #    return list()
 
         # checks if current url has different url than what was passed in (redirect)
-        realURL = resp.url
-        canonical = soup.find('link', {'rel': 'canonical'})     # https://stackoverflow.com/questions/49419577/beautiful-soup-find-address-og-current-website
-        if canonical != None:
-            canonical = canonical['href']
-            if (canonical != realURL):
-                realURL = canonical
+        if (resp.raw_response.status_code >= 300 and resp.raw_response.status_code < 400):
+            realURL = resp.raw_response.headers['Location']
 
         if '#' in realURL:
-            realURL = url[0:url.index('#')]
+            realURL = realURL[0:realURL.index('#')]
 
         # url similarity checker using simhash
         # checks if the hash of the current url is in a list of hashed urls previously crawled.
@@ -170,6 +166,7 @@ def extract_next_links(url, resp):
             output.write(l + '\n')
             output.write('\n-------------------------------------------------------------------\n')
 
+    writeReport()
     return links
 
 def is_valid(url):
