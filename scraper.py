@@ -53,12 +53,20 @@ def extract_next_links(url, resp):
         #if len(soup.text) > 4700:
         #    return list()
 
+        # checks if current url has different url than what was passed in (redirect)
+        realURL = resp.url
+        canonical = soup.find('link', {'rel': 'canonical'})     # https://stackoverflow.com/questions/49419577/beautiful-soup-find-address-og-current-website
+        if canonical != None:
+            canonical = canonical['href']
+            if (canonical != realURL):
+                realURL = canonical
+
         # url similarity checker using simhash
         # checks if the hash of the current url is in a list of hashed urls previously crawled.
         # loops through the previous 25 websites to add the similarity with the current url.
         # averages the similarity and checks if it is above the threshold to decide whether
         # to parse the url or not. appends hash of current url to lsit of crawled hashed urls.
-        hashURL = getTokenHash(resp.url)
+        hashURL = getTokenHash(realURL)
         if hashURL not in crawledURL:
             total = 0
             for hashedURL in crawledURL[-25:]:
@@ -110,13 +118,10 @@ def extract_next_links(url, resp):
         tags = soup.find_all('a')
         # list to hold all the links on the current website
         links = []
-        # checks if current url has different url than what was passed in (redirect)
-        realURL = resp.url
-        canonical = soup.find('link', {'rel': 'canonical'})     # https://stackoverflow.com/questions/49419577/beautiful-soup-find-address-og-current-website
-        if canonical != None:
-            canonical = canonical['href']
-            if (canonical != realURL):
-                realURL = canonical
+
+        if '#' in realURL:
+            realURL = url[0:url.index('#')]
+            uniqueWebsites += 1
 
         # tuple holding the different parts of the url, used for relative paths
         parsed = urlparse(realURL)
@@ -196,29 +201,16 @@ def is_valid(url):
         
 
         # regex to check if the url is within the ics/cs/inf/stats domains
-        inDomain = re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
-
-        if (inDomain):
-            hashURL = getTokenHash(url)
-            if '#' in url:
-                url = url[0:url.index('#')]
-            urlHash = getTokenHash(url)
-            if urlHash not in crawledURL:
-                uniqueWebsites += 1
-                return True
-            else:
-                return False
-        else:
-            return False
+        return re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
 
     except TypeError:
         print ("TypeError for ", parsed)
         raise
 
 # tokenizer method from Assignment 1
-def tokenize(contents):
+def tokenize(text):
 
-    words = re.findall(r'[a-z0-9\'?]+', contents.lower())
+    words = re.findall(r'[a-z0-9\']+', text.lower())
     return words
 
 # frequency method from Assignment 1
