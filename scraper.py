@@ -112,7 +112,7 @@ def extract_next_links(url, resp):
         links = []
         # checks if current url has different url than what was passed in (redirect)
         canonical = soup.find('link', {'rel': 'canonical'})['href']  # https://stackoverflow.com/questions/49419577/beautiful-soup-find-address-og-current-website
-        if (canonical != resp.url):
+        if (canonical != resp.url and canonical != None):
             realURL = canonical
         else:
             realURL = resp.url
