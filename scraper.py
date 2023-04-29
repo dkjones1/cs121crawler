@@ -41,9 +41,6 @@ def extract_next_links(url, resp):
         if not(resp.status < 200 and resp.status >= 400):
             return list()
 
-        # hash the url to store/compare
-        hashURL = getTokenHash(resp.url)
-
         # if the website is empty/None then do not parse
         if (resp.raw_response == None):
             return list()
@@ -66,6 +63,7 @@ def extract_next_links(url, resp):
         # loops through the previous 25 websites to add the similarity with the current url.
         # averages the siilarity and checks if it is above the threshold to decide whether
         # to parse the url or not. appends hash of current url to lsit of crawled hashed urls.
+        hashURL = getTokenHash(resp.url)
         if hashURL not in crawledURL:
             total = 0
             for hashedURL in crawledURL[-25:]:
@@ -94,12 +92,12 @@ def extract_next_links(url, resp):
                 if total >= 0.85:
                     return list()
             crawledSites.append(hashContent)
-            """
-            tokenDict = computeWordFrequencies(tokenList)
-            updateGlobalFrequency(tokenDict)
-            """
         else:
             return list()
+
+        tokenDict = computeTokenFrequencies(tokenList)
+        updateGlobalFrequency(tokenDict)
+        hashTokenDict = computeTokenFrequencies(hashContent)
 
         # finds all the html tags with <a>, these can hold links
         tags = soup.find_all('a')
@@ -202,11 +200,12 @@ def is_valid(url):
 # tokenizer method from Assignment 1
 def tokenize(contents):
 
-    words = re.findall(r'[a-z0-9]+', contents.lower())
+    words = re.findall(r'[a-z0-9\'?]+', contents.lower())
     return words
 
 # frequency method from Assignment 1
 def computeTokenFrequencies(tokenList):
+    tokenFreq = {}
     stopWords = ['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'aren\'t',
                  'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',
                  'can\'t', 'cannot', 'could', 'couldn\'t', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t',
@@ -225,23 +224,11 @@ def computeTokenFrequencies(tokenList):
 
     for token in tokenList:
         if token not in stopWords:
-            if token in freq.keys():
-                freq[token] += 1
+            if token in tokenFreq.keys():
+                tokenFreq[token] += 1
             else:
-                freq[token] = 1
-    
-    """
-    #returns a dict of every token with its frequency
-    URLTokenFrequencies = {}
-    for token in tokenList:
-        if token not in stopWords:
-            if token in URLTokenFrequencies.keys():
-                URLTokenFrequencies[token] += 1
-            else:
-                URLTokenFrequencies[token] = 1
-    return URLTokenFrequencies
-    """
-    return freq
+                tokenFreq[token] = 1
+    return tokenFreq
 
 def getTokenHash(inputStr):
     hash = hashlib.sha256(inputStr.encode('utf-8')).digest() #hashes
@@ -281,14 +268,14 @@ def calculateSimilarity(simOne, simTwo):
     counter /= 32
     return counter
 
-"""
+
 def updateGlobalFrequency(tokenFreqDict):
     for key, value in tokenFreqDict.items():
         if key in freq.keys():
             freq[key] = freq[key] + tokenFreqDict[key]
         else:
             freq[key] = tokenFreqDict[key]
-"""
+
 
 def writeReport():
     with open('report.txt', 'w+') as report:
