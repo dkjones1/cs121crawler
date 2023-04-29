@@ -185,6 +185,7 @@ def is_valid(url):
 
         # regex to check if the url is within the ics/cs/inf/stats domains
         if (re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url)):
+            print('hi')
             website = re.match(
                 r".*\.(css|js|bmp|gif|jpe?g|ico"
                 + r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -198,8 +199,8 @@ def is_valid(url):
             if website:
                 return False
 
-            mailUpload = re.match(r'.*(mailto|wp-content\/upload).*', url)
-            if mailUpload:
+            errors = re.match(r'.*(mailto|wp-content\/upload|pdf).*', url)
+            if errors:
                 return False
 
         else:
