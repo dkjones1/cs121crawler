@@ -72,14 +72,9 @@ def extract_next_links(url, resp):
         hashURL = getTokenHash(realURL)
         if hashURL not in crawledURL:
             total = 0
-
-            similarityIndex = 50
-            if len(crawledURL) < 50:
-                similiarityIndex = len(crawledURL)
-
-            for hashedURL in crawledURL[-similarityIndex:]:
+            for hashedURL in crawledURL[-50:]:
                 total += calculateSimilarity(hashURL, hashedURL)
-            total /= similarityIndex
+            total /= 50
             if total > 0.92:
                 return list()
             crawledURL.append(hashURL)
@@ -111,15 +106,10 @@ def extract_next_links(url, resp):
         hashContent = simHash(hashTokenDict)
         if hashContent not in crawledSites:
             total = 0
-
-            similarityIndex = 50
-            if len(crawledSites) < 50:
-                similiarityIndex = len(crawledSites)
-
-            for hashedContent in crawledSites[-similarityIndex:]:
+            for hashedContent in crawledSites[-50:]:
                 total += calculateSimilarity(hashContent, hashedContent)
-            total /= similarityIndex
-            if total > -1:
+            total /= 50
+            if total > 0.87:
                 return list()
             crawledSites.append(hashContent)
         else:
