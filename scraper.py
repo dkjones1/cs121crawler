@@ -61,9 +61,6 @@ def extract_next_links(url, resp):
             if (canonical != realURL):
                 realURL = canonical
 
-        if not (is_valid(realURL)):
-            return list()
-
         # url similarity checker using simhash
         # checks if the hash of the current url is in a list of hashed urls previously crawled.
         # loops through the previous 25 websites to add the similarity with the current url.
@@ -155,7 +152,8 @@ def extract_next_links(url, resp):
                 if '#' in absPath:
                     absPath = absPath[0:absPath.index('#')]
 
-                links.append(absPath)
+                if is_valid(absPath):
+                    links.append(absPath)
         
         if not ('www.ics.uci.edu' in url or 'www.informatics.uci.edu' in url or 'www.cs.uci.edu' in url or 'www.stat.uci.edu' in url):
             sub = parsed.scheme + '://' + parsed.netloc
@@ -240,7 +238,7 @@ def computeTokenFrequencies(tokenList):
                  'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves']
 
     for token in tokenList:
-        if token not in stopWords:
+        if token not in stopWords and len(token) > 1:
             if token in tokenFreq.keys():
                 tokenFreq[token] += 1
             else:
@@ -299,13 +297,21 @@ def updateGlobalFrequency(tokenFreqDict):
 
 
 def writeReport():
-    global freq
     with open('report.txt', 'w+') as report:
-        sortedFreq = dict(sorted(freq.items(), key=lambda k: (-k[1], k[0])))
-        topFiftyDict = dict(list(sortedFreq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
-        for key, value in topFiftyDict.items():
+        report.write('Top Fifty Most Common Words:\n')
+        sortedFreq = sorted(freq.items(), key=lambda k: (-k[1], k[0]))[0:50]
+        #topFiftyDict = dict(list(sortedFreq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
+        for key, value in sortedFreq.items():
             report.write('%s %s\n' % (key, value))
-        for i in range(5):
+
+        for i in range(3):
+            report.write("\n")
+        report.write('Subdomains:\n')
+        sortedSubdomains = sorted(subdomains.items(), key=lambda v:-v[1])
+        for key, value in sortedSubdomains.items():
+            report.write('%s %s\n' % (key, value))
+
+        for i in range(3):
             report.write("\n")
         report.write("Longest Page: " + str(longestPage))
         report.write("\nUnique Websites: " + str(uniqueWebsites))
