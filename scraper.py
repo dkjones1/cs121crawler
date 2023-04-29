@@ -149,7 +149,7 @@ def extract_next_links(url, resp):
                 subdomains[sub] = 1
 
         if (url != resp.url or url != resp.raw_response.url or resp.url != resp.raw_response.url):
-            output.write(resp.status + '\n')
+            output.write(str(resp.status) + '\n')
             output.write(url + '\n' + resp.url + '\n' + resp.raw_response.url)
             output.write('\n-------------------------------------------------------------------\n')
 
