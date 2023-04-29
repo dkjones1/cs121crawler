@@ -64,9 +64,6 @@ def extract_next_links(url, resp):
         if not (is_valid(realURL)):
             return list()
 
-        if '#' in realURL:
-            realURL = realURL[0:realURL.index('#')]
-
         # url similarity checker using simhash
         # checks if the hash of the current url is in a list of hashed urls previously crawled.
         # loops through the previous 25 websites to add the similarity with the current url.
@@ -88,7 +85,7 @@ def extract_next_links(url, resp):
         tokenList = tokenize(soup.text)
 
         # filter out low value urls
-        if len(tokenList) < 200:
+        if len(tokenList) < 500:
             return list()
 
         # finds frequencies of tokens and creates new dictionary with hash value and frequency
@@ -155,6 +152,9 @@ def extract_next_links(url, resp):
                     else:
                         absPath = parsed.scheme + '://' + parsed.netloc + absPath
 
+                if '#' in absPath:
+                    absPath = absPath[0:absPath.index('#')]
+
                 links.append(absPath)
         
         if not ('www.ics.uci.edu' in url or 'www.informatics.uci.edu' in url or 'www.cs.uci.edu' in url or 'www.stat.uci.edu' in url):
@@ -185,26 +185,30 @@ def is_valid(url):
         if parsed.scheme not in set(["http", "https"]):
             return False
 
-        # maybe add php, TA said to add php but I think some php sites worked
-        website = re.match(
-            r".*\.(css|js|bmp|gif|jpe?g|ico"
-            + r"|png|tiff?|mid|mp2|mp3|mp4"
-            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|php|wp-content\/upload"
-            + r"|ps|eps|tex|ppt|pptx|ppsx|doc|docx|xls|xlsx|names"
-            + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
-            + r"|epub|dll|cnf|tgz|sha1"
-            + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
-
-        if website:
-            return False
-
-        mail = re.match(r'.*(mailto).*', url)
-        if mail:
-            return False
-
         # regex to check if the url is within the ics/cs/inf/stats domains
-        return re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())
+        if (re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url)):
+            website = re.match(
+                r".*\.(css|js|bmp|gif|jpe?g|ico"
+                + r"|png|tiff?|mid|mp2|mp3|mp4"
+                + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|php"
+                + r"|ps|eps|tex|ppt|pptx|ppsx|doc|docx|xls|xlsx|names"
+                + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
+                + r"|epub|dll|cnf|tgz|sha1"
+                + r"|thmx|mso|arff|rtf|jar|csv"
+                + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
+
+            if website:
+                return False
+
+            mailUpload = re.match(r'.*(mailto|wp-content\/upload).*', url)
+            if mailUpload:
+                return False
+
+        else:
+            return False
+
+        return True
+
 
     except TypeError:
         print ("TypeError for ", parsed)
@@ -287,7 +291,6 @@ def calculateSimilarity(simOne, simTwo):
 
 
 def updateGlobalFrequency(tokenFreqDict):
-    global freq
     for key, value in tokenFreqDict.items():
         if key in freq.keys():
             freq[key] = freq[key] + tokenFreqDict[key]
