@@ -4,6 +4,8 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import hashlib
 
+import mmh3
+
 uniqueWebsites = 0      # number of unique websites
 crawledURL = []         # list of hashed url visited
 crawledSites = []       # list of hashed websites visited
@@ -229,6 +231,12 @@ def getTokenHash(inputStr):
     hash = hashlib.sha256(inputStr.encode('utf-8')).digest() #hashes
     binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(32) #converts into binary
     return binaryHash[:32] #returns the first 32 bits
+
+    """
+    hashToInt = mmh3.hash(inputStr, signed = False) #hashes the token to an unsigned int
+    hashToBinary = "{0:b}".format(hashToInt).zfill(32) #converts the int to 32 bit binary representation
+    return hashToBinary
+    """
 
 def simHash(tokenList):
     vectorOutput = [0] * 32  # initialize output vector
