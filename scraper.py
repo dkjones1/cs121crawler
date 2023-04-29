@@ -94,6 +94,10 @@ def extract_next_links(url, resp):
                 if total >= 0.85:
                     return list()
             crawledSites.append(hashContent)
+            """
+            tokenDict = computeWordFrequencies(tokenList)
+            updateGlobalFrequency(tokenDict)
+            """
         else:
             return list()
 
@@ -225,6 +229,18 @@ def computeTokenFrequencies(tokenList):
                 freq[token] += 1
             else:
                 freq[token] = 1
+    
+    """
+    #returns a dict of every token with its frequency
+    URLTokenFrequencies = {}
+    for token in tokenList:
+        if token not in stopWords:
+            if token in URLTokenFrequencies.keys():
+                URLTokenFrequencies[token] += 1
+            else:
+                URLTokenFrequencies[token] = 1
+    return URLTokenFrequencies
+    """
     return freq
 
 def getTokenHash(inputStr):
@@ -265,13 +281,14 @@ def calculateSimilarity(simOne, simTwo):
     counter /= 32
     return counter
 
+"""
 def updateGlobalFrequency(tokenFreqDict):
     for key, value in tokenFreqDict.items():
         if key in freq.keys():
             freq[key] = freq[key] + tokenFreqDict[key]
         else:
             freq[key] = tokenFreqDict[key]
-
+"""
 
 def writeReport():
     with open('report.txt', 'w+') as report:
