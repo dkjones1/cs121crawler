@@ -15,6 +15,7 @@ freq = {}               # dictionary holding common words between all websites
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
+    writeReport()
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
