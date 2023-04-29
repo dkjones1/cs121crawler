@@ -75,7 +75,7 @@ def extract_next_links(url, resp):
             for hashedURL in crawledURL[-25:]:
                 total += calculateSimilarity(hashURL, hashedURL)
                 total /= 25
-                if total >= 0.95:
+                if total >= 0.05:
                     return list()
             crawledURL.append(hashURL)
         else:
@@ -85,7 +85,7 @@ def extract_next_links(url, resp):
         tokenList = tokenize(soup.text)
 
         # filter out low value urls
-        if len(tokenList) < 500:
+        if len(tokenList) < 250:
             return list()
 
         # finds frequencies of tokens and creates new dictionary with hash value and frequency
@@ -109,7 +109,7 @@ def extract_next_links(url, resp):
             for hashedContent in crawledSites[-25:]:
                 total += calculateSimilarity(hashContent, hashedContent)
                 total /= 25
-                if total >= 0.90:
+                if total >= 0.05:
                     return list()
             crawledSites.append(hashContent)
         else:
