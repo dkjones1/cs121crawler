@@ -72,7 +72,7 @@ def extract_next_links(url, resp):
             for hashedURL in crawledURL[-50:]:
                 total += calculateSimilarity(hashURL, hashedURL)
             total /= 50
-            if total > 0.92:
+            if total > 0.75:
                 return list()
             crawledURL.append(hashURL)
         else:
@@ -123,7 +123,6 @@ def extract_next_links(url, resp):
         links = []
 
         # tuple holding the different parts of the url, used for relative paths
-        parsed = urlparse(realURL)
         for link in tags:
             # if the <a> tag element has a link (href)
             if link.has_attr('href'):
@@ -132,7 +131,7 @@ def extract_next_links(url, resp):
 
                 # detecting for relative path urls
                 # missing http
-                '''
+                
                 if not absPath.startswith('http'):
 
                     if absPath.startswith('www.'):
@@ -149,8 +148,8 @@ def extract_next_links(url, resp):
 
                     else:
                         absPath = parsed.scheme + '://' + parsed.netloc + absPath
-                '''
-                absPath = urljoin(realURL, absPath)
+
+                #absPath = urljoin(realURL, absPath)
 
                 if '#' in absPath:
                     absPath = absPath[0:absPath.index('#')]
@@ -159,6 +158,7 @@ def extract_next_links(url, resp):
                     links.append(absPath)
         
         if not ('www.ics.uci.edu' in url or 'www.informatics.uci.edu' in url or 'www.cs.uci.edu' in url or 'www.stat.uci.edu' in url):
+            parsed = urlparse(realURL)
             sub = parsed.scheme + '://' + parsed.netloc
             if sub in subdomains.keys():
                 subdomains[sub] += 1
