@@ -122,6 +122,8 @@ def extract_next_links(url, resp):
         # list to hold all the links on the current website
         links = []
 
+        parsed = urlparse(realURL)
+
         # tuple holding the different parts of the url, used for relative paths
         for link in tags:
             # if the <a> tag element has a link (href)
@@ -158,7 +160,6 @@ def extract_next_links(url, resp):
                     links.append(absPath)
         
         if not ('www.ics.uci.edu' in url or 'www.informatics.uci.edu' in url or 'www.cs.uci.edu' in url or 'www.stat.uci.edu' in url):
-            parsed = urlparse(realURL)
             sub = parsed.scheme + '://' + parsed.netloc
             if sub in subdomains.keys():
                 subdomains[sub] += 1
