@@ -162,9 +162,13 @@ def extract_next_links(url, resp):
                 subdomains[sub] = 1
 
 
-        output.write(str(resp.status) + '\n')
-        output.write(url + '\n' + resp.url + '\n' + resp.raw_response.url)
-        output.write('\n-------------------------------------------------------------------\n')
+        #output.write(str(resp.status) + '\n')
+        #output.write(url + '\n' + resp.url + '\n' + resp.raw_response.url)
+        #output.write('\n-------------------------------------------------------------------\n')
+
+        for l in links:
+            output.write(l + '\n')
+            output.write('\n-------------------------------------------------------------------\n')
 
     return links
 
