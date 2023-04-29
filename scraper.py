@@ -74,7 +74,7 @@ def extract_next_links(url, resp):
         tokenList = tokenize(soup.text)
 
         # filter out low value urls
-        if len(tokenList) < 100:
+        if len(tokenList) < 200:
             return list()
 
         # finds frequencies of tokens and creates new dictionary with hash value and frequency
@@ -110,12 +110,20 @@ def extract_next_links(url, resp):
         tags = soup.find_all('a')
         # list to hold all the links on the current website
         links = []
+        # checks if current url has different url than what was passed in (redirect)
+        canonical = soup.find('link', {'rel': 'canonical'})['href']  # https://stackoverflow.com/questions/49419577/beautiful-soup-find-address-og-current-website
+        if (canonical != resp.url):
+            realURL = canonical
+        else:
+            realURL = resp.url
         # tuple holding the different parts of the url, used for relative paths
-        parsed = urlparse(resp.url)
+        parsed = urlparse(realURL)
         for link in tags:
             # if the <a> tag element has a link (href)
             if link.has_attr('href'):
                 absPath = link['href'].strip()
+
+
                 # detecting for relative path urls
                 # missing http
                 if not absPath.startswith('http'):
@@ -169,7 +177,7 @@ def is_valid(url):
         website = re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
-            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|wp-content\/upload"
+            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|php|wp-content\/upload"
             + r"|ps|eps|tex|ppt|pptx|ppsx|doc|docx|xls|xlsx|names"
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
