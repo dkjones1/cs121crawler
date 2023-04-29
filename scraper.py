@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import hashlib
 
-import mmh3
+# import mmh3
 
 uniqueWebsites = 0      # number of unique websites
 crawledURL = []         # list of hashed url visited
@@ -47,12 +47,6 @@ def extract_next_links(url, resp):
 
         # BeautifulSoup object to get the contents of the website
         soup = BeautifulSoup(resp.raw_response.content.decode('utf-8', 'ignore'), "html.parser")
-        # tokenize the contents of the website
-        tokenList = tokenize(soup.text)
-        
-        #filter out low value urls
-        if len(tokenList) < 100: 
-            return list()
 
         # filter out large websites by character to avoid tokenizing a large website
         #if len(soup.text) > 4700:
@@ -61,7 +55,7 @@ def extract_next_links(url, resp):
         # url similarity checker using simhash
         # checks if the hash of the current url is in a list of hashed urls previously crawled.
         # loops through the previous 25 websites to add the similarity with the current url.
-        # averages the siilarity and checks if it is above the threshold to decide whether
+        # averages the similarity and checks if it is above the threshold to decide whether
         # to parse the url or not. appends hash of current url to lsit of crawled hashed urls.
         hashURL = getTokenHash(resp.url)
         if hashURL not in crawledURL:
@@ -74,6 +68,20 @@ def extract_next_links(url, resp):
             crawledURL.append(hashURL)
         else:
             return list()
+
+        # tokenize the contents of the website
+        tokenList = tokenize(soup.text)
+
+        # filter out low value urls
+        if len(tokenList) < 100:
+            return list()
+
+        # finds frequencies of tokens and creates new dictionary with hash value and frequency
+        tokenDict = computeTokenFrequencies(tokenList)
+        hashTokenDict = {}
+        for key in tokenDict.keys():
+            hashKey = getTokenHash(key)
+            hashTokenDict[hashKey] = tokenDict[key]
 
         # content similarity checker using simhash
         # similar to the url similarity checker. checks if contents are
@@ -95,9 +103,7 @@ def extract_next_links(url, resp):
         else:
             return list()
 
-        tokenDict = computeTokenFrequencies(tokenList)
         updateGlobalFrequency(tokenDict)
-        hashTokenDict = computeTokenFrequencies(hashContent)
 
         # finds all the html tags with <a>, these can hold links
         tags = soup.find_all('a')
@@ -182,8 +188,8 @@ def is_valid(url):
 
         if (inDomain):
             hashURL = getTokenHash(url)
-            if '#' in resp.url:
-                url = url[0:resp.url.index('#')]
+            if '#' in url:
+                url = url[0:url.index('#')]
             urlHash = getTokenHash(url)
             if urlHash not in crawledURL:
                 uniqueWebsites += 1
@@ -241,24 +247,28 @@ def getTokenHash(inputStr):
     return hashToBinary
     """
 
-def simHash(tokenList):
-    vectorOutput = [0] * 32  # initialize output vector
-    for token in tokenList:
-        hashedToken = getTokenHash(token)  # hash every token
-        for i in range(32):  # 32 is the number of bits that are returned from the hash
-            if (hashedToken[i] == '0'):
-                vectorOutput[i] = vectorOutput[i] - 1  # subtract if the bit is 0
-            else:
-                vectorOutput[i] = vectorOutput[i] + 1  # add if the bit is 1
-
+def calculateFingerprint(simHashList):
     fingerprint = []
     for i in range(32):
-        if vectorOutput[i] <= 0:
+        if simHashList[i] <= 0:
             fingerprint.append('0')
         else:
             fingerprint.append('1')
 
     return ''.join(fingerprint)
+
+def simHash(hashDict):
+    vectorOutput = [0] * 32  # initialize output vector
+    for i in range(32):
+        sum = 0
+        for key in hashDict.keys():
+            if (key[i] == '0'):
+                sum -= hashDict[key]
+            else:
+                sum += hashDict[key]
+        vectorOutput[i] = sum
+
+    return calculateFingerprint(vectorOutput)
 
 def calculateSimilarity(simOne, simTwo):
     counter = 0
@@ -278,9 +288,10 @@ def updateGlobalFrequency(tokenFreqDict):
 
 
 def writeReport():
+    global freq
     with open('report.txt', 'w+') as report:
-        freq = dict(sorted(freq.items(), key=lambda k: (-k[1], k[0])))
-        topFiftyDict = dict(list(freq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
+        sortedFreq = dict(sorted(freq.items(), key=lambda k: (-k[1], k[0])))
+        topFiftyDict = dict(list(sortedFreq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
         for key, value in topFiftyDict.items():
             report.write('%s %s\n' % (key, value))
         for i in range(5):
