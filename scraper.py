@@ -39,7 +39,7 @@ def extract_next_links(url, resp):
     with open('output.txt', 'a+') as output:
 
         # codes in 300 means redirect, 200 means fine, everything outside that range means it is not a good website
-        if resp.status < 200 and resp.status >= 400:
+        if resp.status < 200 or resp.status >= 400:
             return list()
 
         # if the website is empty/None then do not parse
@@ -148,7 +148,8 @@ def extract_next_links(url, resp):
             else:
                 subdomains[sub] = 1
 
-        if (resp.status >= 300 and resp.status < 400):
+        if (url != resp.url or url != resp.raw_response.url or resp.url != resp.raw_response.url):
+            output.write(resp.status + '\n')
             output.write(url + '\n' + resp.url + '\n' + resp.raw_response.url)
             output.write('\n-------------------------------------------------------------------\n')
 
