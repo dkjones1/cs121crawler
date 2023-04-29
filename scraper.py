@@ -1,6 +1,6 @@
 # from enum import unique
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 import hashlib
 
@@ -132,6 +132,7 @@ def extract_next_links(url, resp):
 
                 # detecting for relative path urls
                 # missing http
+                '''
                 if not absPath.startswith('http'):
 
                     if absPath.startswith('www.'):
@@ -148,6 +149,8 @@ def extract_next_links(url, resp):
 
                     else:
                         absPath = parsed.scheme + '://' + parsed.netloc + absPath
+                '''
+                absPath = urljoin(realURL, absPath)
 
                 if '#' in absPath:
                     absPath = absPath[0:absPath.index('#')]
@@ -185,7 +188,6 @@ def is_valid(url):
 
         # regex to check if the url is within the ics/cs/inf/stats domains
         if (re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url)):
-            print('hi')
             website = re.match(
                 r".*\.(css|js|bmp|gif|jpe?g|ico"
                 + r"|png|tiff?|mid|mp2|mp3|mp4"
