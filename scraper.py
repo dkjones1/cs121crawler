@@ -234,7 +234,7 @@ def getTokenHash(inputStr):
 
     """
     hashToInt = mmh3.hash(inputStr, signed = False) #hashes the token to an unsigned int
-    hashToBinary = "{0:b}".format(hashToInt).zfill(32) #converts the int to 32 bit binary representation
+    hashToBinary = "{0:b}".format(hashToInt).zfill(32) #converts the int to 32 bit binary representation https://appdividend.com/2021/06/14/how-to-convert-python-int-to-binary-string/
     return hashToBinary
     """
 
@@ -264,6 +264,14 @@ def calculateSimilarity(simOne, simTwo):
             counter += 1
     counter /= 32
     return counter
+
+def updateGlobalFrequency(tokenFreqDict):
+    for key, value in tokenFreqDict.items():
+        if key in freq.keys():
+            freq[key] = freq[key] + tokenFreqDict[key]
+        else:
+            freq[key] = tokenFreqDict[key]
+
 
 def writeReport():
     with open('report.txt', 'w+') as report:
