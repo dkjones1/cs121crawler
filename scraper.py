@@ -72,7 +72,7 @@ def extract_next_links(url, resp):
             for hashedURL in crawledURL[-50:]:
                 total += calculateSimilarity(hashURL, hashedURL)
             total /= 50
-            if total > 0.75:
+            if total > 0.80:
                 return list()
             crawledURL.append(hashURL)
         else:
@@ -202,7 +202,7 @@ def is_valid(url):
             if website:
                 return False
 
-            errors = re.match(r'.*(mailto|wp-content\/upload|pdf|ps).*', url)
+            errors = re.match(r'.*(mailto|wp-content\/upload|pdf|\.ps).*', url)
             if errors:
                 return False
 
