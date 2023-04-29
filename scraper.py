@@ -131,7 +131,7 @@ def extract_next_links(url, resp):
 
                 # detecting for relative path urls
                 # missing http
-                
+
                 if not absPath.startswith('http'):
 
                     if absPath.startswith('www.'):
@@ -201,7 +201,7 @@ def is_valid(url):
             if website:
                 return False
 
-            errors = re.match(r'.*(mailto|wp-content\/upload|pdf).*', url)
+            errors = re.match(r'.*(mailto|wp-content\/upload|pdf|ps).*', url)
             if errors:
                 return False
 
