@@ -47,7 +47,7 @@ def extract_next_links(url, resp):
             return list()
 
         # BeautifulSoup object to get the contents of the website
-        soup = BeautifulSoup(resp.raw_response.text.decode('utf-8', 'ignore'), "html.parser")
+        soup = BeautifulSoup(resp.raw_response.text, "html.parser")
 
         # filter out large websites by character to avoid tokenizing a large website
         #if len(soup.text) > 4700:
