@@ -299,9 +299,9 @@ def updateGlobalFrequency(tokenFreqDict):
 def writeReport():
     with open('report.txt', 'w+') as report:
         report.write('Top Fifty Most Common Words:\n')
-        sortedFreq = dict(sorted(freq.items(), key=lambda k: (-k[1], k[0])))[0:50]
-        #topFiftyDict = dict(list(sortedFreq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
-        for key, value in sortedFreq.items():
+        sortedFreq = dict(sorted(freq.items(), key=lambda k: (-k[1], k[0])))
+        topFiftyDict = dict(list(sortedFreq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
+        for key, value in topFiftyDict.items():
             report.write('%s %s\n' % (key, value))
 
         for i in range(3):
