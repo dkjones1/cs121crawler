@@ -72,7 +72,7 @@ def extract_next_links(url, resp):
             for hashedURL in crawledURL[-50:]:
                 total += calculateSimilarity(hashURL, hashedURL)
             total /= 50
-            if total > 0.80:
+            if total > 0.93:
                 return list()
             crawledURL.append(hashURL)
         else:
@@ -106,7 +106,7 @@ def extract_next_links(url, resp):
             for hashedContent in crawledSites[-50:]:
                 total += calculateSimilarity(hashContent, hashedContent)
             total /= 50
-            if total > 0.87:
+            if total > 0.88:
                 return list()
             crawledSites.append(hashContent)
         else:
