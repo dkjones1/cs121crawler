@@ -61,18 +61,33 @@ def extract_next_links(url, resp):
             if (canonical != realURL):
                 realURL = canonical
 
+
+        urlCharTokens = []
+        withoutScheme = realURL.rfind('://')    # parses out http(s)://
+        if withoutScheme == -1:
+            withoutScheme = 0
+
+        for letter in realURL[withoutScheme:]:
+            urlCharTokens.append(letter)
+
+        urlLetterDict = computeTokenFrequencies(urlCharTokens)
+        hashURLDict = {}
+        for key in hashURLDict.keys():
+            hashKey = getTokenHash(key)
+            hashURLDict[hashKey] = urlLetterDict[key]
+
         # url similarity checker using simhash
         # checks if the hash of the current url is in a list of hashed urls previously crawled.
         # loops through the previous 25 websites to add the similarity with the current url.
         # averages the similarity and checks if it is above the threshold to decide whether
         # to parse the url or not. appends hash of current url to lsit of crawled hashed urls.
-        hashURL = getTokenHash(realURL)
+        hashURL = simHash(hashURLDict)
         if hashURL not in crawledURL:
             total = 0
             for hashedURL in crawledURL[-50:]:
                 total += calculateSimilarity(hashURL, hashedURL)
             total /= 50
-            if total > 0.93:
+            if total > 0.95:
                 return list()
             crawledURL.append(hashURL)
         else:
@@ -202,7 +217,7 @@ def is_valid(url):
             if website:
                 return False
 
-            errors = re.match(r'.*(mailto|wp-content\/upload|pdf|\.ps|action=login).*', url)
+            errors = re.match(r'.*(mailto|wp-content\/upload|pdf|\.ps|action=login|precision=second).*', url)
             if errors:
                 return False
 
