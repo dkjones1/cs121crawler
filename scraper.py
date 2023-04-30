@@ -83,7 +83,7 @@ def extract_next_links(url, resp):
             for hashedURL in crawledURL[-50:]:
                 total += calculateSimilarity(hashURL, hashedURL)
             total /= 50
-            if total > 0.95:
+            if total > 0.97:
                 return list()
             crawledURL.append(hashURL)
         else:
@@ -93,11 +93,11 @@ def extract_next_links(url, resp):
         tokenList = tokenize(soup.text)
 
         # filter out low value urls
-        if len(tokenList) < 250:
+        if len(tokenList) < 200:
             return list()
 
         # filter out large websites by characters
-        if len(tokenList) > 50000:
+        if len(tokenList) > 500000:
             return list()
 
         # finds frequencies of tokens and creates new dictionary with hash value and frequency
@@ -121,7 +121,7 @@ def extract_next_links(url, resp):
             for hashedContent in crawledSites[-50:]:
                 total += calculateSimilarity(hashContent, hashedContent)
             total /= 50
-            if total > 0.90:
+            if total > 0.92:
                 return list()
             crawledSites.append(hashContent)
         else:
@@ -181,6 +181,9 @@ def extract_next_links(url, resp):
             else:
                 subdomains[sub] = 1
 
+        if 'php' in realURL:
+            output.write(str(resp.status) + '\n' + realURL)
+
     writeReport()
     return links
 
@@ -196,9 +199,10 @@ def is_valid(url):
         # regex to check if the url is within the ics/cs/inf/stats domains
         if (re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url)):
             website = re.match(
+                # might want to add php
                 r".*\.(css|js|bmp|gif|jpe?g|ico"
                 + r"|png|tiff?|mid|mp2|mp3|mp4"
-                + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|php"
+                + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
                 + r"|ps|eps|tex|ppt|pptx|ppsx|doc|docx|xls|xlsx|names"
                 + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
                 + r"|epub|dll|cnf|tgz|sha1"
