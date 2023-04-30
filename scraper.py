@@ -97,7 +97,7 @@ def extract_next_links(url, resp):
             return list()
 
         # filter out large websites by characters
-        if len(tokenList) > 25000:
+        if len(tokenList) > 50000:
             return list()
 
         # finds frequencies of tokens and creates new dictionary with hash value and frequency
