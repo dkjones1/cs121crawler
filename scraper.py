@@ -49,10 +49,6 @@ def extract_next_links(url, resp):
         # BeautifulSoup object to get the contents of the website
         soup = BeautifulSoup(resp.raw_response.text, "html.parser")
 
-        # filter out large websites by character to avoid tokenizing a large website
-        #if len(soup.text) > 4700:
-        #    return list()
-
         # checks if current url has different url than what was passed in (redirect)
         realURL = resp.url
         canonical = soup.find('link', {'rel': 'canonical'})     # https://stackoverflow.com/questions/49419577/beautiful-soup-find-address-og-current-website
@@ -97,7 +93,11 @@ def extract_next_links(url, resp):
         tokenList = tokenize(soup.text)
 
         # filter out low value urls
-        if len(tokenList) < 250:
+        if len(tokenList) < 300:
+            return list()
+
+        # filter out large websites by characters
+        if len(tokenList) > 25000:
             return list()
 
         # finds frequencies of tokens and creates new dictionary with hash value and frequency
