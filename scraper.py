@@ -177,7 +177,7 @@ def extract_next_links(url, resp):
                 if '#' in absPath:
                     absPath = absPath[0:absPath.index('#')]
 
-            links.append(absPath)
+                links.append(absPath)
 
     writeReport()
     return links
