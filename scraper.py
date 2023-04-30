@@ -66,7 +66,7 @@ def extract_next_links(url, resp):
         for letter in realURL[withoutScheme:]:
             urlCharTokens.append(letter)
 
-        urlLetterDict = computeTokenFrequencies(urlCharTokens)
+        urlLetterDict = computeCharacterFrequencies(urlCharTokens)
         hashURLDict = {}
         for key in urlLetterDict.keys():
             hashKey = getTokenHash(key)
@@ -256,6 +256,16 @@ def computeTokenFrequencies(tokenList):
             else:
                 tokenFreq[token] = 1
     return tokenFreq
+
+def computeCharacterFrequencies(characterList):
+    characterFreq = {}
+
+    for token in characterList:
+            if token in characterFreq.keys():
+                characterFreq[token] += 1
+            else:
+                characterFreq[token] = 1
+    return characterFreq
 
 def getTokenHash(inputStr):
     hash = hashlib.sha256(inputStr.encode('utf-8')).digest() #hashes
