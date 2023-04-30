@@ -47,7 +47,7 @@ def extract_next_links(url, resp):
             return list()
 
         # BeautifulSoup object to get the contents of the website
-        soup = BeautifulSoup(resp.raw_response.text, "html.parser")
+        soup = BeautifulSoup(resp.raw_response.content, "html.parser")
 
         # checks if current url has different url than what was passed in (redirect)
         realURL = resp.url
@@ -83,7 +83,7 @@ def extract_next_links(url, resp):
             for hashedURL in crawledURL[-50:]:
                 total += calculateSimilarity(hashURL, hashedURL)
             total /= 50
-            if total > 0.97:
+            if total > 0.98:
                 return list()
             crawledURL.append(hashURL)
         else:
@@ -121,7 +121,7 @@ def extract_next_links(url, resp):
             for hashedContent in crawledSites[-50:]:
                 total += calculateSimilarity(hashContent, hashedContent)
             total /= 50
-            if total > 0.92:
+            if total > 0.95:
                 return list()
             crawledSites.append(hashContent)
         else:
@@ -129,6 +129,7 @@ def extract_next_links(url, resp):
 
         if (len(tokenList) > longestPage):
             longestPage = len(tokenList)
+
         updateGlobalFrequency(tokenDict)
         uniqueWebsites += 1
 
@@ -166,13 +167,8 @@ def extract_next_links(url, resp):
                     else:
                         absPath = parsed.scheme + '://' + parsed.netloc + absPath
 
-                #absPath = urljoin(realURL, absPath)
-
                 if '#' in absPath:
                     absPath = absPath[0:absPath.index('#')]
-
-                if is_valid(absPath):
-                    links.append(absPath)
         
         if not ('www.ics.uci.edu' in url or 'www.informatics.uci.edu' in url or 'www.cs.uci.edu' in url or 'www.stat.uci.edu' in url):
             sub = parsed.scheme + '://' + parsed.netloc
@@ -180,9 +176,6 @@ def extract_next_links(url, resp):
                 subdomains[sub] += 1
             else:
                 subdomains[sub] = 1
-
-        if 'php' in realURL:
-            output.write(str(resp.status) + '\n' + realURL)
 
     writeReport()
     return links
