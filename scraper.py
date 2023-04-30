@@ -68,7 +68,7 @@ def extract_next_links(url, resp):
 
         urlLetterDict = computeTokenFrequencies(urlCharTokens)
         hashURLDict = {}
-        for key in hashURLDict.keys():
+        for key in urlLetterDict.keys():
             hashKey = getTokenHash(key)
             hashURLDict[hashKey] = urlLetterDict[key]
 
@@ -76,7 +76,7 @@ def extract_next_links(url, resp):
         # checks if the hash of the current url is in a list of hashed urls previously crawled.
         # loops through the previous 25 websites to add the similarity with the current url.
         # averages the similarity and checks if it is above the threshold to decide whether
-        # to parse the url or not. appends hash of current url to lsit of crawled hashed urls.
+        # to parse the url or not. appends hash of current url to list of crawled hashed urls.
         hashURL = simHash(hashURLDict)
         print(hashURL)
         if hashURL not in crawledURL:
