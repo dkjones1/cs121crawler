@@ -78,7 +78,6 @@ def extract_next_links(url, resp):
         # averages the similarity and checks if it is above the threshold to decide whether
         # to parse the url or not. appends hash of current url to list of crawled hashed urls.
         hashURL = simHash(hashURLDict)
-        print(hashURL)
         if hashURL not in crawledURL:
             total = 0
             for hashedURL in crawledURL[-50:]:
