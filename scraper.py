@@ -78,6 +78,7 @@ def extract_next_links(url, resp):
         # averages the similarity and checks if it is above the threshold to decide whether
         # to parse the url or not. appends hash of current url to lsit of crawled hashed urls.
         hashURL = simHash(hashURLDict)
+        print(hashURL not in crawledURL)
         if hashURL not in crawledURL:
             total = 0
             for hashedURL in crawledURL[-50:]:
@@ -98,8 +99,8 @@ def extract_next_links(url, resp):
             return list()
 
         # filter out large websites by characters
-        #if len(tokenList) > 50000:
-        #    return list()
+        if len(tokenList) > 50000:
+            return list()
 
         # finds frequencies of tokens and creates new dictionary with hash value and frequency
         tokenDict = computeTokenFrequencies(tokenList)
@@ -182,15 +183,6 @@ def extract_next_links(url, resp):
             else:
                 subdomains[sub] = 1
 
-
-        #output.write(str(resp.status) + '\n')
-        #output.write(url + '\n' + resp.url + '\n' + resp.raw_response.url)
-        #output.write('\n-------------------------------------------------------------------\n')
-
-        for l in links:
-            output.write(l + '\n')
-            output.write('\n-------------------------------------------------------------------\n')
-
     writeReport()
     return links
 
@@ -218,7 +210,7 @@ def is_valid(url):
             if website:
                 return False
 
-            errors = re.match(r'.*(mailto|wp-content\/upload|pdf|\.ps|action=login).*', url)
+            errors = re.match(r'.*(mailto|wp-content\/upload|pdf|\.ps|action=login|precision=second).*', url)
             if errors:
                 return False
 
