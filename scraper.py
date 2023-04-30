@@ -209,6 +209,10 @@ def is_valid(url):
             if website:
                 return False
 
+            errors = re.match(r'.*(mailto|wp-content\/upload|action=login|precision=second).*', url)
+            if errors:
+                return False
+
         else:
             return False
 
