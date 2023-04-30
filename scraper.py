@@ -83,7 +83,7 @@ def extract_next_links(url, resp):
             for hashedURL in crawledURL[-50:]:
                 total += calculateSimilarity(hashURL, hashedURL)
             total /= 50
-            if total > 0.98:
+            if total > 0.99:
                 return list()
             crawledURL.append(hashURL)
         else:
@@ -97,7 +97,7 @@ def extract_next_links(url, resp):
             return list()
 
         # filter out large websites by characters
-        if len(tokenList) > 500000:
+        if len(tokenList) > 100000:
             return list()
 
         # finds frequencies of tokens and creates new dictionary with hash value and frequency
@@ -146,6 +146,8 @@ def extract_next_links(url, resp):
                 subdomains[sub] += 1
             else:
                 subdomains[sub] = 1
+        else:
+            output.write(resp.url + '\n')
 
         # tuple holding the different parts of the url, used for relative paths
         for link in tags:
@@ -205,10 +207,6 @@ def is_valid(url):
                 + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
 
             if website:
-                return False
-
-            errors = re.match(r'.*(mailto|wp-content\/upload|pdf|\.ps|action=login|precision=second|zip).*', url)
-            if errors:
                 return False
 
         else:
