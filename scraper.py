@@ -47,7 +47,7 @@ def extract_next_links(url, resp):
             return list()
 
         # BeautifulSoup object to get the contents of the website
-        soup = BeautifulSoup(resp.raw_response.content, "html.parser")
+        soup = BeautifulSoup(resp.raw_response.text, "html.parser")
 
         # checks if current url has different url than what was passed in (redirect)
         realURL = resp.url
