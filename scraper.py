@@ -2,7 +2,7 @@ import re
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 import hashlib
-import mmh3
+#import mmh3
 
 uniqueWebsites = 0      # number of unique websites
 crawledURL = []         # list of url visited
@@ -284,9 +284,11 @@ def getTokenHash(inputStr):
     return binaryHash[:32] #returns the first 32 bits
     """
 
+    """
     hashToInt = mmh3.hash(inputStr, signed = False) #hashes the token to an unsigned int
     hashToBinary = "{0:b}".format(hashToInt).zfill(32) #converts the int to 32 bit binary representation https://appdividend.com/2021/06/14/how-to-convert-python-int-to-binary-string/
     return hashToBinary[:32]
+    """
 
 def calculateFingerprint(simHashList):
     fingerprint = []
