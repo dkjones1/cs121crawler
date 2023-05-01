@@ -7,7 +7,8 @@ import hashlib
 # import mmh3
 
 uniqueWebsites = 0      # number of unique websites
-crawledURL = []         # list of hashed url visited
+crawledURL = []         # list of url visited
+crawledHashURL = []     # list of hashed url visited
 crawledSites = []       # list of hashed websites visited
 longestPage = 0         # length of webpage by word
 subdomains = {}         # key: subdomain, value: number of pages under the subdomain
@@ -32,6 +33,7 @@ def extract_next_links(url, resp):
     global longestPage
     global freq
     global crawledURL
+    global crawledHashURL
     global crawledSites
     global subdomains
     global uniqueWebsites
@@ -57,35 +59,42 @@ def extract_next_links(url, resp):
             if (canonical != realURL):
                 realURL = canonical
 
+        if realURL.endswith('/'):
+            realURL = realURL[:-1]
 
-        urlCharTokens = []
-        withoutScheme = realURL.rfind('://')    # parses out http(s)://
-        if withoutScheme == -1:
-            withoutScheme = 0
 
-        for letter in realURL[withoutScheme:]:
-            urlCharTokens.append(letter)
-
-        urlLetterDict = computeCharacterFrequencies(urlCharTokens)
-        hashURLDict = {}
-        for key in urlLetterDict.keys():
-            hashKey = getTokenHash(key)
-            hashURLDict[hashKey] = urlLetterDict[key]
 
         # url similarity checker using simhash
         # checks if the hash of the current url is in a list of hashed urls previously crawled.
         # loops through the previous 25 websites to add the similarity with the current url.
         # averages the similarity and checks if it is above the threshold to decide whether
         # to parse the url or not. appends hash of current url to list of crawled hashed urls.
-        hashURL = simHash(hashURLDict)
-        if hashURL not in crawledURL:
+        if realURL not in crawledURL:
             total = 0
+            crawledURL.append(realURL)
+
+            urlCharTokens = []
+            withoutScheme = realURL.rfind('://')  # parses out http(s)://
+            if withoutScheme == -1:
+                withoutScheme = 0
+
+            for letter in realURL[withoutScheme:]:
+                urlCharTokens.append(letter)
+
+            urlLetterDict = computeCharacterFrequencies(urlCharTokens)
+            hashURLDict = {}
+            for key in urlLetterDict.keys():
+                hashKey = getTokenHash(key)
+                hashURLDict[hashKey] = urlLetterDict[key]
+
+            hashURL = simHash(hashURLDict)
+
             for hashedURL in crawledURL[-50:]:
                 total += calculateSimilarity(hashURL, hashedURL)
             total /= 50
-            if total > 0.99:
+            if total > 0.97:
                 return list()
-            crawledURL.append(hashURL)
+            crawledHashURL.append(hashURL)
         else:
             return list()
 
@@ -155,7 +164,6 @@ def extract_next_links(url, resp):
             if link.has_attr('href'):
                 absPath = link['href'].strip()
 
-
                 # detecting for relative path urls
                 # missing http
 
@@ -194,9 +202,9 @@ def is_valid(url):
             return False
         
         #hardcodes the base domain websites
-        domainURL = {'https://www.ics.uci.edu', 'https://www.cs.uci.edu', 'https://www.informatics.uci.edu', 'https://www.stat.uci.edu'}
-        if(url in domainURL):
-            return True
+        #domainURL = {'https://www.ics.uci.edu', 'https://www.cs.uci.edu', 'https://www.informatics.uci.edu', 'https://www.stat.uci.edu'}
+        #if(url in domainURL):
+        #    return True
 
         # regex to check if the url is within the ics/cs/inf/stats domains
         if (re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url)):
