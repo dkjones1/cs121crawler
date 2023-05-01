@@ -278,11 +278,11 @@ def computeCharacterFrequencies(characterList):
     return characterFreq
 
 def getTokenHash(inputStr):
-    """
+    
     hash = hashlib.sha256(inputStr.encode('utf-8')).digest() #hashes
     binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(32) #converts into binary
     return binaryHash[:32] #returns the first 32 bits
-    """
+    
 
     """
     hashToInt = mmh3.hash(inputStr, signed = False) #hashes the token to an unsigned int
