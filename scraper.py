@@ -87,10 +87,10 @@ def extract_next_links(url, resp):
 
             hashURL = simHash(hashURLDict)
 
-            for hashedURL in crawledHashURL[-50:]:
+            for hashedURL in crawledHashURL[-100:]:
                 total += calculateSimilarity(hashURL, hashedURL)
-            total /= 50
-            if total > 0.97:
+            total /= 100
+            if total > 0.93:
                 return list()
             crawledHashURL.append(hashURL)
         else:
@@ -100,7 +100,7 @@ def extract_next_links(url, resp):
         tokenList = tokenize(soup.text)
 
         # filter out low value urls
-        if len(tokenList) < 200:
+        if len(tokenList) < 400:
             return list()
 
         # filter out large websites by characters
@@ -125,10 +125,10 @@ def extract_next_links(url, resp):
         hashContent = simHash(hashTokenDict)
         if hashContent not in crawledSites:
             total = 0
-            for hashedContent in crawledSites[-50:]:
+            for hashedContent in crawledSites[-100:]:
                 total += calculateSimilarity(hashContent, hashedContent)
-            total /= 50
-            if total > 0.95:
+            total /= 100
+            if total > 0.87:
                 return list()
             crawledSites.append(hashContent)
         else:
