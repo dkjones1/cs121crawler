@@ -54,13 +54,13 @@ def extract_next_links(url, resp):
         canonical = soup.find('link', {'rel': 'canonical'})     # https://stackoverflow.com/questions/49419577/beautiful-soup-find-address-og-current-website
         if canonical != None:
             canonical = canonical['href']
+            if canonical.endswith('/'):
+                canonical = realURL[:-1]
             if (canonical != realURL):
                 realURL = canonical
 
         if realURL.endswith('/'):
             realURL = realURL[:-1]
-
-
 
         # url similarity checker using simhash
         # checks if the hash of the current url is in a list of hashed urls previously crawled.
@@ -100,7 +100,7 @@ def extract_next_links(url, resp):
         tokenList = tokenize(soup.text)
 
         # filter out low value urls
-        if len(tokenList) < 400:
+        if len(tokenList) < 150:
             return list()
 
         # filter out large websites by characters
@@ -184,6 +184,8 @@ def extract_next_links(url, resp):
 
                 if '#' in absPath:
                     absPath = absPath[0:absPath.index('#')]
+                if absPath.endswith('/'):
+                    absPath = absPath[:-1]
 
                 links.append(absPath)
 
@@ -200,9 +202,9 @@ def is_valid(url):
             return False
         
         # hardcodes the base domain websites
-        domainURL = {'https://www.ics.uci.edu', 'https://www.cs.uci.edu', 'https://www.informatics.uci.edu', 'https://www.stat.uci.edu'}
-        if(url in domainURL):
-            return True
+        #domainURL = {'https://www.ics.uci.edu', 'https://www.cs.uci.edu', 'https://www.informatics.uci.edu', 'https://www.stat.uci.edu'}
+        #if(url in domainURL):
+        #    return True
 
         # regex to check if the url is within the ics/cs/inf/stats domains
         if (re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url)):
