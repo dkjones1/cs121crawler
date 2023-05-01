@@ -86,7 +86,7 @@ def extract_next_links(url, resp):
 
             hashURL = simHash(hashURLDict)
 
-            for hashedURL in crawledURL[-50:]:
+            for hashedURL in crawledHashURL[-50:]:
                 total += calculateSimilarity(hashURL, hashedURL)
             total /= 50
             if total > 0.97:
