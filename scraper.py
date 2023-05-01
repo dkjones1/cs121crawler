@@ -220,7 +220,7 @@ def is_valid(url):
             if website:
                 return False
 
-            errors = re.match(r'.*(mailto|wp-content\/upload|pdf|zip|action=login|precision=second|action=download).*', url)
+            errors = re.match(r'.*(mailto|wp-content\/upload|action=login|precision=second|action=download).*', url)
             if errors:
                 return False
 
