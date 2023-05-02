@@ -281,8 +281,8 @@ def computeCharacterFrequencies(characterList):
 
 def getTokenHash(inputStr):
     
-    hash = hashlib.sha256(inputStr.encode('utf-8')).digest() #hashes
-    binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(32) #converts into binary
+    hash = hashlib.sha256(inputStr.encode('utf-8')).digest() #hashes https://stackoverflow.com/questions/48613002/sha-256-hashing-in-python
+    binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(32) #converts into binary https://crypto.stackexchange.com/questions/83224/how-to-get-an-output-of-sha-1-with-first-2-bit-are-zeros
     return binaryHash[:32] #returns the first 32 bits
     
 
