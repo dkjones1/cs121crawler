@@ -56,8 +56,8 @@ def extract_next_links(url, resp):
             canonical = realURL[:-1]
         if (canonical != realURL):
             realURL = canonical
-        if not is_valid(realURL):
-            return list()
+            if not is_valid(realURL):
+                return list()
 
     if realURL.endswith('/'):
         realURL = realURL[:-1]
