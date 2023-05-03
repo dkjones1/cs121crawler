@@ -36,158 +36,157 @@ def extract_next_links(url, resp):
     global subdomains
     global uniqueWebsites
 
-    with open('output.txt', 'a+') as output:
+    # codes in 300 means redirect, 200 means fine, everything outside that range means it is not a good website
+    if resp.status < 200 or resp.status >= 400:
+        return list()
 
-        # codes in 300 means redirect, 200 means fine, everything outside that range means it is not a good website
-        if resp.status < 200 or resp.status >= 400:
+    # if the website is empty/None then do not parse
+    if (resp.raw_response == None):
+        return list()
+
+    # BeautifulSoup object to get the contents of the website
+    soup = BeautifulSoup(resp.raw_response.text, "html.parser")
+
+    # checks if current url has different url than what was passed in (redirect)
+    # https://stackoverflow.com/questions/49419577/beautiful-soup-find-address-og-current-website
+    realURL = resp.url
+    canonical = soup.find('link', {'rel': 'canonical'})
+    if canonical != None:
+        canonical = canonical['href']
+        if canonical.endswith('/'):
+            canonical = realURL[:-1]
+        if (canonical != realURL):
+            realURL = canonical
+        if not is_valid(realURL):
             return list()
 
-        # if the website is empty/None then do not parse
-        if (resp.raw_response == None):
-            return list()
+    if realURL.endswith('/'):
+        realURL = realURL[:-1]
 
-        # BeautifulSoup object to get the contents of the website
-        soup = BeautifulSoup(resp.raw_response.text, "html.parser")
+    # url similarity checker using simhash
+    # checks if the hash of the current url is in a list of hashed urls previously crawled.
+    # loops through the previous 25 websites to add the similarity with the current url.
+    # averages the similarity and checks if it is above the threshold to decide whether
+    # to parse the url or not. appends hash of current url to list of crawled hashed urls.
+    if realURL not in crawledURL:
+        total = 0
+        crawledURL.append(realURL)
 
-        # checks if current url has different url than what was passed in (redirect)
-        realURL = resp.url
-        canonical = soup.find('link', {'rel': 'canonical'})     # https://stackoverflow.com/questions/49419577/beautiful-soup-find-address-og-current-website
-        if canonical != None:
-            canonical = canonical['href']
-            if canonical.endswith('/'):
-                canonical = realURL[:-1]
-            if (canonical != realURL):
-                realURL = canonical
+        urlCharTokens = []
+        withoutScheme = realURL.rfind('://')  # parses out http(s)://
+        if withoutScheme == -1:
+            withoutScheme = 0
 
-        if realURL.endswith('/'):
-            realURL = realURL[:-1]
+        for letter in realURL[withoutScheme:]:
+            urlCharTokens.append(letter)
 
-        # url similarity checker using simhash
-        # checks if the hash of the current url is in a list of hashed urls previously crawled.
-        # loops through the previous 25 websites to add the similarity with the current url.
-        # averages the similarity and checks if it is above the threshold to decide whether
-        # to parse the url or not. appends hash of current url to list of crawled hashed urls.
-        if realURL not in crawledURL:
-            total = 0
-            crawledURL.append(realURL)
-
-            urlCharTokens = []
-            withoutScheme = realURL.rfind('://')  # parses out http(s)://
-            if withoutScheme == -1:
-                withoutScheme = 0
-
-            for letter in realURL[withoutScheme:]:
-                urlCharTokens.append(letter)
-
-            urlLetterDict = computeCharacterFrequencies(urlCharTokens)
-            hashURLDict = {}
-            for key in urlLetterDict.keys():
-                hashKey = getTokenHash(key)
-                hashURLDict[hashKey] = urlLetterDict[key]
-
-            hashURL = simHash(hashURLDict)
-
-            for hashedURL in crawledHashURL[-100:]:
-                total += calculateSimilarity(hashURL, hashedURL)
-            total /= 100
-            if total > 0.93:
-                return list()
-            crawledHashURL.append(hashURL)
-        else:
-            return list()
-
-        # tokenize the contents of the website
-        tokenList = tokenize(soup.text)
-
-        # filter out low value urls
-        if len(tokenList) < 150:
-            return list()
-
-        # filter out large websites by characters
-        if len(tokenList) > 100000:
-            return list()
-
-        # finds frequencies of tokens and creates new dictionary with hash value and frequency
-        tokenDict = computeTokenFrequencies(tokenList)
-        hashTokenDict = {}
-        for key in tokenDict.keys():
+        urlLetterDict = computeCharacterFrequencies(urlCharTokens)
+        hashURLDict = {}
+        for key in urlLetterDict.keys():
             hashKey = getTokenHash(key)
-            hashTokenDict[hashKey] = tokenDict[key]
+            hashURLDict[hashKey] = urlLetterDict[key]
 
-        # content similarity checker using simhash
-        # similar to the url similarity checker. checks if contents are
-        # the same by hashing the tokens and checking the hash in the list
-        # of hashed website contents that were already crawled. check the
-        # previous 25 hashed website contents and calculate the similarity
-        # of the 25. take the average of the similarity and don't parse the
-        # current website if the similarity is above the threshold. append
-        # the hashed website content to the list of hashed contents.
-        hashContent = simHash(hashTokenDict)
-        if hashContent not in crawledSites:
-            total = 0
-            for hashedContent in crawledSites[-100:]:
-                total += calculateSimilarity(hashContent, hashedContent)
-            total /= 100
-            if total > 0.87:
-                return list()
-            crawledSites.append(hashContent)
-        else:
+        hashURL = simHash(hashURLDict)
+
+        for hashedURL in crawledHashURL[-100:]:
+            total += calculateSimilarity(hashURL, hashedURL)
+        total /= 100
+        if total > 0.93:
             return list()
+        crawledHashURL.append(hashURL)
+    else:
+        return list()
 
-        if (len(tokenList) > longestPage):
-            longestPage = len(tokenList)
+    # tokenize the contents of the website
+    tokenList = tokenize(soup.text)
 
-        updateGlobalFrequency(tokenDict)
-        uniqueWebsites += 1
+    # filter out low value urls
+    if len(tokenList) < 150:
+        return list()
 
-        # finds all the html tags with <a>, these can hold links
-        tags = soup.find_all('a')
-        # list to hold all the links on the current website
-        links = []
+    # filter out large websites by characters
+    if len(tokenList) > 100000:
+        return list()
 
-        parsed = urlparse(realURL)
+    # finds frequencies of tokens and creates new dictionary with hash value and frequency
+    tokenDict = computeTokenFrequencies(tokenList)
+    hashTokenDict = {}
+    for key in tokenDict.keys():
+        hashKey = getTokenHash(key)
+        hashTokenDict[hashKey] = tokenDict[key]
 
-        if not ('www.ics.uci.edu' in url or 'www.informatics.uci.edu' in url or 'www.cs.uci.edu' in url or 'www.stat.uci.edu' in url):
-            sub = parsed.scheme + '://' + parsed.netloc
-            if sub in subdomains.keys():
-                subdomains[sub] += 1
-            else:
-                subdomains[sub] = 1
+    # content similarity checker using simhash
+    # similar to the url similarity checker. checks if contents are
+    # the same by hashing the tokens and checking the hash in the list
+    # of hashed website contents that were already crawled. check the
+    # previous 25 hashed website contents and calculate the similarity
+    # of the 25. take the average of the similarity and don't parse the
+    # current website if the similarity is above the threshold. append
+    # the hashed website content to the list of hashed contents.
+    hashContent = simHash(hashTokenDict)
+    if hashContent not in crawledSites:
+        total = 0
+        for hashedContent in crawledSites[-100:]:
+            total += calculateSimilarity(hashContent, hashedContent)
+        total /= 100
+        if total > 0.87:
+            return list()
+        crawledSites.append(hashContent)
+    else:
+        return list()
+
+    if (len(tokenList) > longestPage):
+        longestPage = len(tokenList)
+
+    updateGlobalFrequency(tokenDict)
+    uniqueWebsites += 1
+
+    # finds all the html tags with <a>, these can hold links
+    tags = soup.find_all('a')
+    # list to hold all the links on the current website
+    links = []
+
+    parsed = urlparse(realURL)
+
+    if not ('www.ics.uci.edu' in url or 'www.informatics.uci.edu' in url or 'www.cs.uci.edu' in url or 'www.stat.uci.edu' in url):
+        sub = parsed.scheme + '://' + parsed.netloc
+        if sub in subdomains.keys():
+            subdomains[sub] += 1
         else:
-            output.write(resp.url + '\n')
+            subdomains[sub] = 1
 
-        # tuple holding the different parts of the url, used for relative paths
-        for link in tags:
-            # if the <a> tag element has a link (href)
-            if link.has_attr('href'):
-                absPath = link['href'].strip()
+    # tuple holding the different parts of the url, used for relative paths
+    for link in tags:
+        # if the <a> tag element has a link (href)
+        if link.has_attr('href'):
+            absPath = link['href'].strip()
 
-                # detecting for relative path urls
-                # missing http
+            # detecting for relative path urls
+            # missing http
 
-                if not absPath.startswith('http'):
+            if not absPath.startswith('http'):
 
-                    if absPath.startswith('www.'):
-                        absPath = parsed.scheme + '://' + absPath
+                if absPath.startswith('www.'):
+                    absPath = parsed.scheme + '://' + absPath
 
-                    elif absPath.startswith('/www.'):
-                        absPath = parsed.scheme + ':/' + absPath
+                elif absPath.startswith('/www.'):
+                    absPath = parsed.scheme + ':/' + absPath
 
-                    elif absPath.startswith('//www.'):
-                            absPath = parsed.scheme + absPath
+                elif absPath.startswith('//www.'):
+                        absPath = parsed.scheme + absPath
 
-                    elif absPath.startswith('//'):
-                        absPath = parsed.scheme + ':' + absPath
+                elif absPath.startswith('//'):
+                    absPath = parsed.scheme + ':' + absPath
 
-                    else:
-                        absPath = parsed.scheme + '://' + parsed.netloc + absPath
+                else:
+                    absPath = parsed.scheme + '://' + parsed.netloc + absPath
 
-                if '#' in absPath:
-                    absPath = absPath[0:absPath.index('#')]
-                if absPath.endswith('/'):
-                    absPath = absPath[:-1]
+            if '#' in absPath:
+                absPath = absPath[0:absPath.index('#')]
+            if absPath.endswith('/'):
+                absPath = absPath[:-1]
 
-                links.append(absPath)
+            links.append(absPath)
 
     writeReport()
     return links
@@ -236,13 +235,13 @@ def is_valid(url):
         print ("TypeError for ", parsed)
         raise
 
-# tokenizer method from Assignment 1
+# tokenizer method to extract words from the websites
 def tokenize(text):
 
     words = re.findall(r'[a-z0-9\']+', text.lower())
     return words
 
-# frequency method from Assignment 1
+# frequency method that counts the amount of tokens given a list, excluding stop words
 def computeTokenFrequencies(tokenList):
     tokenFreq = {}
     stopWords = ['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'aren\'t',
@@ -269,6 +268,7 @@ def computeTokenFrequencies(tokenList):
                 tokenFreq[token] = 1
     return tokenFreq
 
+# similar to token frequency, this counts the frequency of characters for url similarity
 def computeCharacterFrequencies(characterList):
     characterFreq = {}
 
@@ -279,6 +279,7 @@ def computeCharacterFrequencies(characterList):
                 characterFreq[token] = 1
     return characterFreq
 
+# uses sha256 hash to get the 32-bit binary hash value for a passed in string
 def getTokenHash(inputStr):
     
     hash = hashlib.sha256(inputStr.encode('utf-8')).digest() #hashes
@@ -292,6 +293,7 @@ def getTokenHash(inputStr):
     return hashToBinary[:32]
     """
 
+# calculates the fingerprint values given the sim hash values
 def calculateFingerprint(simHashList):
     fingerprint = []
     for i in range(32):
@@ -302,6 +304,7 @@ def calculateFingerprint(simHashList):
 
     return ''.join(fingerprint)
 
+# calculates simhash values according to frequencies of tokens
 def simHash(hashDict):
     vectorOutput = [0] * 32  # initialize output vector
     for i in range(32):
@@ -315,6 +318,7 @@ def simHash(hashDict):
 
     return calculateFingerprint(vectorOutput)
 
+# calculates the similarities between two sim hash values
 def calculateSimilarity(simOne, simTwo):
     counter = 0
     for i in range(32):
@@ -323,7 +327,7 @@ def calculateSimilarity(simOne, simTwo):
     counter /= 32
     return counter
 
-
+# updates the dictionary holding frequencies of tokens across all websites crawled
 def updateGlobalFrequency(tokenFreqDict):
     for key, value in tokenFreqDict.items():
         if key in freq.keys():
@@ -331,7 +335,7 @@ def updateGlobalFrequency(tokenFreqDict):
         else:
             freq[key] = tokenFreqDict[key]
 
-
+# writes the final report with frequencies, subdomains, longest page, and unique websites
 def writeReport():
     with open('report.txt', 'w+') as report:
         report.write('Top Fifty Most Common Words:\n')
