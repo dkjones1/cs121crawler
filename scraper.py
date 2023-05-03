@@ -2,7 +2,6 @@ import re
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 import hashlib
-#import mmh3
 
 uniqueWebsites = 0      # number of unique websites
 crawledURL = []         # list of url visited
@@ -281,17 +280,9 @@ def computeCharacterFrequencies(characterList):
 
 # uses sha256 hash to get the 32-bit binary hash value for a passed in string
 def getTokenHash(inputStr):
-    
     hash = hashlib.sha256(inputStr.encode('utf-8')).digest() #hashes https://stackoverflow.com/questions/48613002/sha-256-hashing-in-python
     binaryHash = bin(int.from_bytes(hash, byteorder='big'))[2:].zfill(32) #converts into binary https://crypto.stackexchange.com/questions/83224/how-to-get-an-output-of-sha-1-with-first-2-bit-are-zeros
     return binaryHash[:32] #returns the first 32 bits
-    
-
-    """
-    hashToInt = mmh3.hash(inputStr, signed = False) #hashes the token to an unsigned int
-    hashToBinary = "{0:b}".format(hashToInt).zfill(32) #converts the int to 32 bit binary representation https://appdividend.com/2021/06/14/how-to-convert-python-int-to-binary-string/
-    return hashToBinary[:32]
-    """
 
 # calculates the fingerprint values given the sim hash values
 def calculateFingerprint(simHashList):
