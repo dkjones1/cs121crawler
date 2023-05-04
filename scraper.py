@@ -3,11 +3,13 @@ from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 import hashlib
 
+validURL = 0            # number of valid websites that we crawl
 uniqueWebsites = 0      # number of unique websites
 crawledURL = []         # list of url visited
 crawledHashURL = []     # list of hashed url visited
 crawledSites = []       # list of hashed websites visited
-longestPage = 0         # length of webpage by word
+longestPage = 0         # length of the longest website by word
+longestPageURL = ''     # url of the longest page
 subdomains = {}         # key: subdomain, value: number of pages under the subdomain
 freq = {}               # dictionary holding common words between all websites
 
@@ -27,7 +29,9 @@ def extract_next_links(url, resp):
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
 
     # global variables for report
+    global validURL
     global longestPage
+    global longestPageURL
     global freq
     global crawledURL
     global crawledHashURL
@@ -70,6 +74,7 @@ def extract_next_links(url, resp):
     if realURL not in crawledURL:
         total = 0
         crawledURL.append(realURL)
+        uniqueWebsites += 1
 
         urlCharTokens = []
         withoutScheme = realURL.rfind('://')  # parses out http(s)://
@@ -90,7 +95,7 @@ def extract_next_links(url, resp):
         for hashedURL in crawledHashURL[-100:]:
             total += calculateSimilarity(hashURL, hashedURL)
         total /= 100
-        if total > 0.93:
+        if total > 0.96:
             return list()
         crawledHashURL.append(hashURL)
     else:
@@ -100,7 +105,7 @@ def extract_next_links(url, resp):
     tokenList = tokenize(soup.text)
 
     # filter out low value urls
-    if len(tokenList) < 150:
+    if len(tokenList) < 200:
         return list()
 
     # filter out large websites by characters
@@ -128,7 +133,7 @@ def extract_next_links(url, resp):
         for hashedContent in crawledSites[-100:]:
             total += calculateSimilarity(hashContent, hashedContent)
         total /= 100
-        if total > 0.87:
+        if total > 0.90:
             return list()
         crawledSites.append(hashContent)
     else:
@@ -136,9 +141,10 @@ def extract_next_links(url, resp):
 
     if (len(tokenList) > longestPage):
         longestPage = len(tokenList)
+        longestPageURL = realURL
 
     updateGlobalFrequency(tokenDict)
-    uniqueWebsites += 1
+    validURL += 1
 
     # finds all the html tags with <a>, these can hold links
     tags = soup.find_all('a')
@@ -198,14 +204,9 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
-        
-        # hardcodes the base domain websites
-        #domainURL = {'https://www.ics.uci.edu', 'https://www.cs.uci.edu', 'https://www.informatics.uci.edu', 'https://www.stat.uci.edu'}
-        #if(url in domainURL):
-        #    return True
 
         # regex to check if the url is within the ics/cs/inf/stats domains
-        if (re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url)):
+        if (re.match(r'.*(\.ics\.uci\.edu\/|\.cs\.uci\.edu\/|\.informatics\.uci\.edu\/|\.stat\.uci\.edu\/).*', url.lower())):
             website = re.match(
                 # might want to add php
                 r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -220,7 +221,7 @@ def is_valid(url):
             if website:
                 return False
 
-            errors = re.match(r'.*(mailto|wp-content\/upload|action=login|precision=second|action=download).*', url)
+            errors = re.match(r'.*(mailto|wp-content\/upload|action=login|precision=second|action=download|action=upload|zip|pdf|video).*', url)
             if errors:
                 return False
 
@@ -228,7 +229,6 @@ def is_valid(url):
             return False
 
         return True
-
 
     except TypeError:
         print ("TypeError for ", parsed)
@@ -338,11 +338,11 @@ def writeReport():
         for i in range(3):
             report.write("\n")
         report.write('Subdomains:\n')
-        sortedSubdomains = dict(sorted(subdomains.items(), key=lambda v:-v[1]))
-        for key, value in sortedSubdomains.items():
+        for key, value in sorted(subdomains.items()):
             report.write('%s %s\n' % (key, value))
 
         for i in range(3):
             report.write("\n")
-        report.write("Longest Page: " + str(longestPage))
+        report.write("Number of crawled valid websites are: " + str(validURL))
+        report.write("The longest crawled page was " + longestPageURL + " with " + str(longestPage) + " words")
         report.write("\nUnique Websites: " + str(uniqueWebsites))
