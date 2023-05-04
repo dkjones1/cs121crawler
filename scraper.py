@@ -133,7 +133,7 @@ def extract_next_links(url, resp):
         for hashedContent in crawledSites[-100:]:
             total += calculateSimilarity(hashContent, hashedContent)
         total /= 100
-        if total > 0.90:
+        if total > 0.93:
             return list()
         crawledSites.append(hashContent)
     else:
