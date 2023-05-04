@@ -43,7 +43,6 @@ def extract_next_links(url, resp):
     if resp.status < 200 or resp.status >= 400:
         return list()
 
-    # if the website is empty/None then do not parse
     if (resp.raw_response == None):
         return list()
 
@@ -95,7 +94,7 @@ def extract_next_links(url, resp):
         for hashedURL in crawledHashURL[-100:]:
             total += calculateSimilarity(hashURL, hashedURL)
         total /= 100
-        if total > 0.96:
+        if total > 0.97:
             return list()
         crawledHashURL.append(hashURL)
     else:
@@ -109,7 +108,7 @@ def extract_next_links(url, resp):
         return list()
 
     # filter out large websites by characters
-    if len(tokenList) > 100000:
+    if len(tokenList) > 30000:
         return list()
 
     # finds frequencies of tokens and creates new dictionary with hash value and frequency
