@@ -104,11 +104,11 @@ def extract_next_links(url, resp):
     tokenList = tokenize(soup.text)
 
     # filter out low value urls
-    if len(tokenList) < 200:
+    if len(tokenList) < 150:
         return list()
 
     # filter out large websites by characters
-    if len(tokenList) > 30000:
+    if len(tokenList) > 50000:
         return list()
 
     # finds frequencies of tokens and creates new dictionary with hash value and frequency
