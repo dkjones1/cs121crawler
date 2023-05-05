@@ -225,7 +225,7 @@ def is_valid(url):
                 return False
 
             # parts of urls that caused 403/404 errors
-            errors = re.match(r'.*(mailto|wp-content\/upload|action=login|precision=second|action=download|action=upload|\.?\/?zip|\.?\/?pdf|video).*', url)
+            errors = re.match(r'.*(mailto|wp-content\/upload|action=login|precision=second|action=download|action=upload|(\.|\/)zip|(\.|\/)pdf|video).*', url)
             if errors:
                 return False
 
