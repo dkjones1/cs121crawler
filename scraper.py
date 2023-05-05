@@ -103,11 +103,11 @@ def extract_next_links(url, resp):
     # tokenize the contents of the website
     tokenList = tokenize(soup.text)
 
-    # filter out low value urls
+    # filter out low value urls, 150 words is about a paragraph
     if len(tokenList) < 150:
         return list()
 
-    # filter out large websites by characters
+    # filter out large websites by characters, 50k words is about 100 pages
     if len(tokenList) > 50000:
         return list()
 
@@ -138,10 +138,12 @@ def extract_next_links(url, resp):
     else:
         return list()
 
+    # updates longest page length and url if longer page is found
     if (len(tokenList) > longestPage):
         longestPage = len(tokenList)
         longestPageURL = realURL
 
+    # updates dictionary with token frequencies and valid urls crawled
     updateGlobalFrequency(tokenDict)
     validURL += 1
 
@@ -152,6 +154,7 @@ def extract_next_links(url, resp):
 
     parsed = urlparse(realURL)
 
+    # counts subdomains
     if not ('www.ics.uci.edu' in url or 'www.informatics.uci.edu' in url or 'www.cs.uci.edu' in url or 'www.stat.uci.edu' in url):
         sub = parsed.scheme + '://' + parsed.netloc
         if sub in subdomains.keys():
@@ -160,14 +163,13 @@ def extract_next_links(url, resp):
             subdomains[sub] = 1
 
     # tuple holding the different parts of the url, used for relative paths
+    # https://stackoverflow.com/questions/1080411/retrieve-links-from-web-page-using-python-and-beautifulsoup
     for link in tags:
         # if the <a> tag element has a link (href)
         if link.has_attr('href'):
             absPath = link['href'].strip()
 
             # detecting for relative path urls
-            # missing http
-
             if not absPath.startswith('http'):
 
                 if absPath.startswith('www.'):
@@ -185,6 +187,7 @@ def extract_next_links(url, resp):
                 else:
                     absPath = parsed.scheme + '://' + parsed.netloc + absPath
 
+            # defragments url
             if '#' in absPath:
                 absPath = absPath[0:absPath.index('#')]
             if absPath.endswith('/'):
@@ -192,6 +195,7 @@ def extract_next_links(url, resp):
 
             links.append(absPath)
 
+    # updates final report
     writeReport()
     return links
 
@@ -220,6 +224,7 @@ def is_valid(url):
             if website:
                 return False
 
+            # parts of urls that caused 403/404 errors
             errors = re.match(r'.*(mailto|wp-content\/upload|action=login|precision=second|action=download|action=upload|zip|pdf|video).*', url)
             if errors:
                 return False
