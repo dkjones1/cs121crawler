@@ -94,7 +94,7 @@ def extract_next_links(url, resp):
         for hashedURL in crawledHashURL[-100:]:
             total += calculateSimilarity(hashURL, hashedURL)
         total /= 100
-        if total > 0.97:
+        if total > 0.96:
             return list()
         crawledHashURL.append(hashURL)
     else:
@@ -132,7 +132,7 @@ def extract_next_links(url, resp):
         for hashedContent in crawledSites[-100:]:
             total += calculateSimilarity(hashContent, hashedContent)
         total /= 100
-        if total > 0.93:
+        if total > 0.90:
             return list()
         crawledSites.append(hashContent)
     else:
@@ -343,5 +343,5 @@ def writeReport():
         for i in range(3):
             report.write("\n")
         report.write("Number of crawled valid websites are: " + str(validURL))
-        report.write("The longest crawled page was " + longestPageURL + " with " + str(longestPage) + " words")
+        report.write("\nThe longest crawled page was " + longestPageURL + " with " + str(longestPage) + " words")
         report.write("\nUnique Websites: " + str(uniqueWebsites))
