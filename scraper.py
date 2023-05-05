@@ -334,10 +334,10 @@ def updateGlobalFrequency(tokenFreqDict):
 def writeReport():
     with open('report.txt', 'w+') as report:
         report.write("Report")
-        report.write("1)")
+        report.write("\n\n1)")
         report.write("\nUnique Websites: " + str(uniqueWebsites))
         report.write("\nNumber of crawled valid websites are: " + str(validURL))
-        report.write("\n2)")
+        report.write("\n\n2)")
         report.write("\nThe longest crawled page was " + longestPageURL + " with " + str(longestPage) + " words")
 
         for i in range(3):
