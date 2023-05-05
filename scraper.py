@@ -333,14 +333,18 @@ def updateGlobalFrequency(tokenFreqDict):
 # writes the final report with frequencies, subdomains, longest page, and unique websites
 def writeReport():
     with open('report.txt', 'w+') as report:
-        report.write("Unique Websites: " + str(uniqueWebsites))
+        report.write("Report")
+        report.write("1)")
+        report.write("\nUnique Websites: " + str(uniqueWebsites))
         report.write("\nNumber of crawled valid websites are: " + str(validURL))
+        report.write("\n2)")
         report.write("\nThe longest crawled page was " + longestPageURL + " with " + str(longestPage) + " words")
 
         for i in range(3):
             report.write("\n")
 
-        report.write('Top Fifty Most Common Words:\n')
+        report.write("3)")
+        report.write('\nTop Fifty Most Common Words:\n')
         sortedFreq = dict(sorted(freq.items(), key=lambda k: (-k[1], k[0])))
         topFiftyDict = dict(list(sortedFreq.items())[0: 50]) #idk if it works https://www.geeksforgeeks.org/python-get-first-n-keyvalue-pairs-in-given-dictionary/
         for key, value in topFiftyDict.items():
@@ -349,6 +353,7 @@ def writeReport():
         for i in range(3):
             report.write("\n")
 
-        report.write('Subdomains:\n')
+        report.write("4)")
+        report.write('\nSubdomains:\n')
         for key, value in sorted(subdomains.items()):
             report.write('%s %s\n' % (key, value))
